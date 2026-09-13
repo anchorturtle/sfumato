@@ -7,7 +7,7 @@ export const TRAVELLER_TERM_POINTS = [
   "You grant jestR a perpetual, worldwide, royalty-free license to use, display, reproduce, crop, adapt, and share this work in any medium — including the Orbit / Sfumato gallery, social posts, prints, and future collaborative editions.",
   "No payment is due. This is a collaboration, not a sale, commission, or employment.",
   "jestR has free control to show, hold, edit presentation of, or decline any offer without notice.",
-  "You will not offer illegal work, hate, or any sexual content involving minors.",
+  "You will not offer anything illegal, or work you have no right to share.",
 ];
 
 export const TRAVELLER_TERM_CLOSE =
