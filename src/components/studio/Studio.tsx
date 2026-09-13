@@ -1157,8 +1157,8 @@ export function Studio() {
               <span className="dock-logo-blob" />
             </span>
             <span className="dock-logo-text">
-              <span className="dock-logo-main">Orbit</span>
-              <span className="dock-logo-sub">Sfumato</span>
+              <span className="dock-logo-main">Sfumato</span>
+              <span className="dock-logo-sub">Orbit</span>
             </span>
           </a>
           <nav className="dock-nav" aria-label="Orbit">
