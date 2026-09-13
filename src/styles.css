@@ -1893,6 +1893,13 @@ body.is-color-drag .canvas-col {
   white-space: nowrap;
 }
 
+.dock-nav {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 4px;
+}
+
 .dock-end {
   display: flex;
   flex-shrink: 0;
@@ -1928,10 +1935,10 @@ body.is-color-drag .canvas-col {
 @media (max-width: 767px) {
   .studio-dock {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: auto auto minmax(0, 1fr);
     grid-template-areas:
-      "brand end"
-      "player player";
+      "brand nav end"
+      "player player player";
     gap: 8px 10px;
     margin: max(0.45rem, env(safe-area-inset-top)) 0.55rem 0.35rem;
     padding: 10px 10px 10px 12px;
@@ -1957,8 +1964,13 @@ body.is-color-drag .canvas-col {
     font-size: 16px;
   }
 
-  .dock-logo-wrap::before {
-    inset: -6px -10px;
+  .dock-nav {
+    grid-area: nav;
+  }
+
+  .dock-nav .analog-btn {
+    min-width: 40px;
+    min-height: 40px;
   }
 
   .site-nav,

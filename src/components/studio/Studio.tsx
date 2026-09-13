@@ -1159,11 +1159,21 @@ export function Studio() {
               <span className="dock-logo-sub">Orbit</span>
             </span>
           </a>
-          <nav className="site-nav studio-enter" aria-label="Orbit">
-            <a className="site-link" href="https://www.anchorturtle.com/">
-              <Home className="size-3.5" />
-              Orbit
+          <nav className="dock-nav" aria-label="Orbit">
+            <a className="analog-btn analog-round" href="https://www.anchorturtle.com/" aria-label="Orbit home">
+              <Home className="size-5" />
             </a>
+            <button
+              type="button"
+              className={cn("analog-btn analog-round", travellersOpen && "is-on")}
+              aria-label="Travellers gallery"
+              aria-pressed={travellersOpen}
+              onClick={() => setTravellersOpen(true)}
+            >
+              <Images className="size-5" />
+            </button>
+          </nav>
+          <nav className="site-nav studio-enter" aria-label="Orbit pages">
             <a className="site-link" href="https://www.anchorturtle.com/#gallery">
               <Images className="size-3.5" />
               Gallery
@@ -1173,17 +1183,6 @@ export function Studio() {
           <div className="dock-end">
           <div className="dock-divider hidden sm:block" />
           <div className="dock-actions studio-enter studio-enter-delay-1 flex items-center gap-1">
-            <IconTip label="Travellers">
-              <button
-                type="button"
-                className={cn("analog-btn analog-round", travellersOpen && "is-on")}
-                aria-label="Travellers gallery"
-                aria-pressed={travellersOpen}
-                onClick={() => setTravellersOpen(true)}
-              >
-                <Images className="size-5" />
-              </button>
-            </IconTip>
             <IconTip label="Undo">
               <button
                 type="button"
