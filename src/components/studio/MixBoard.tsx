@@ -7,8 +7,21 @@ import { rgbToHex, hexToRgb } from "@/lib/oil/pigments";
 import { clearMixBoard, loadMixBoard, saveMixBoard } from "@/lib/oil/persist";
 import { cn } from "@/lib/utils";
 
-const MIX_W = 640;
-const MIX_H = 640;
+const MIX_BASE = 480;
+
+function mixPixels(el: HTMLElement) {
+  const r = el.getBoundingClientRect();
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  let w = Math.max(240, Math.round(Math.max(r.width, 1) * dpr));
+  let h = Math.max(180, Math.round(Math.max(r.height, 1) * dpr));
+  const cap = 960;
+  if (w > cap || h > cap) {
+    const s = cap / Math.max(w, h);
+    w = Math.max(240, Math.round(w * s));
+    h = Math.max(180, Math.round(h * s));
+  }
+  return { w, h };
+}
 
 type MixMode = "drop" | "blend" | "knife" | "swirl" | "pick";
 
@@ -29,8 +42,6 @@ export function MixBoard({ color, sampling = false, onUse, onKeep }: Props) {
   const lastPt = useRef<{ x: number; y: number } | null>(null);
   const pickingHeld = useRef(false);
   const cursorRef = useRef<HTMLDivElement>(null);
-  const colorRef = useRef(color);
-  colorRef.current = color;
 
   const [mode, setMode] = useState<MixMode>("drop");
   const [size, setSize] = useState(56);
@@ -38,6 +49,12 @@ export function MixBoard({ color, sampling = false, onUse, onKeep }: Props) {
   const [painted, setPainted] = useState(false);
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
+  const colorRef = useRef(color);
+  colorRef.current = color;
+  const modeRef = useRef(mode);
+  modeRef.current = mode;
+  const sizeRef = useRef(size);
+  sizeRef.current = size;
 
   const applyMode = useCallback(
     (engine: OilEngine, next: MixMode, rgb: [number, number, number], sz: number) => {
@@ -45,7 +62,7 @@ export function MixBoard({ color, sampling = false, onUse, onKeep }: Props) {
         engine.setParams({
           tool: "oil",
           color: rgb,
-          size: sz,
+          size: sz * (engine.width / MIX_BASE),
           flow: 0.96,
           smear: 0.42,
           wetness: 0.95,
@@ -61,7 +78,7 @@ export function MixBoard({ color, sampling = false, onUse, onKeep }: Props) {
         engine.setParams({
           tool: "blend",
           color: rgb,
-          size: sz * 1.15,
+          size: sz * 1.15 * (engine.width / MIX_BASE),
           flow: 0.18,
           smear: 0.88,
           wetness: 0.97,
@@ -77,7 +94,7 @@ export function MixBoard({ color, sampling = false, onUse, onKeep }: Props) {
         engine.setParams({
           tool: "knife",
           color: rgb,
-          size: sz,
+          size: sz * (engine.width / MIX_BASE),
           flow: 0.1,
           smear: 0.58,
           wetness: 0.94,
@@ -93,7 +110,7 @@ export function MixBoard({ color, sampling = false, onUse, onKeep }: Props) {
         engine.setParams({
           tool: "swirl",
           color: rgb,
-          size: sz * 1.25,
+          size: sz * 1.25 * (engine.width / MIX_BASE),
           flow: 0.12,
           smear: 0.72,
           wetness: 0.98,
@@ -115,11 +132,13 @@ export function MixBoard({ color, sampling = false, onUse, onKeep }: Props) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const engine = new OilEngine(MIX_W, MIX_H, "glass", 48);
+    const stage = canvas.parentElement ?? canvas;
+    const first = mixPixels(stage);
+    const engine = new OilEngine(first.w, first.h, "glass", 48);
     engine.reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     engineRef.current = engine;
-    canvas.width = MIX_W;
-    canvas.height = MIX_H;
+    canvas.width = first.w;
+    canvas.height = first.h;
     const ctx = canvas.getContext("2d", { alpha: false });
     if (!ctx) return;
     ctxRef.current = ctx;
@@ -165,6 +184,18 @@ export function MixBoard({ color, sampling = false, onUse, onKeep }: Props) {
       kick();
     };
 
+    const fit = () => {
+      if (stopped || engine.isStroking) return;
+      const { w, h } = mixPixels(stage);
+      if (canvas.width === w && canvas.height === h) return;
+      canvas.width = w;
+      canvas.height = h;
+      engine.resize(w, h);
+      applyMode(engine, modeRef.current, colorRef.current, sizeRef.current);
+      engine.drawTo(ctx);
+      kick();
+    };
+
     const endPointer = () => {
       if (!engine.isStroking) return;
       engine.pointerUp();
@@ -180,6 +211,9 @@ export function MixBoard({ color, sampling = false, onUse, onKeep }: Props) {
       engine,
     };
 
+    const ro = new ResizeObserver(() => fit());
+    ro.observe(stage);
+
     engine.drawTo(ctx);
     kick();
     void loadMixBoard().then((snap) => {
@@ -191,9 +225,8 @@ export function MixBoard({ color, sampling = false, onUse, onKeep }: Props) {
         kick();
         return;
       }
-      if (snap && snap.width === MIX_W && snap.height === MIX_H) {
-        engine.loadSnapshot(snap);
-      }
+      if (snap) engine.loadSnapshot(snap);
+      fit();
       engine.drawTo(ctx);
       setPainted(engine.hasPainted);
       setReady(true);
@@ -205,6 +238,7 @@ export function MixBoard({ color, sampling = false, onUse, onKeep }: Props) {
       cancelAnimationFrame(rafRef.current);
       window.removeEventListener("pointerup", endPointer);
       window.removeEventListener("pointercancel", endPointer);
+      ro.disconnect();
       engine.onChange = null;
       if (saveTimer.current) clearTimeout(saveTimer.current);
     };
@@ -232,8 +266,8 @@ export function MixBoard({ color, sampling = false, onUse, onKeep }: Props) {
     if (!canvas || !engine) return;
     const rect = canvas.getBoundingClientRect();
     if (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) return;
-    const x = ((clientX - rect.left) / rect.width) * MIX_W;
-    const y = ((clientY - rect.top) / rect.height) * MIX_H;
+    const x = ((clientX - rect.left) / Math.max(1, rect.width)) * canvas.width;
+    const y = ((clientY - rect.top) / Math.max(1, rect.height)) * canvas.height;
     const rgb = hexToRgb(hex);
     engine.dropDollop(x, y, rgb, size);
     onUse(rgb);
@@ -246,8 +280,8 @@ export function MixBoard({ color, sampling = false, onUse, onKeep }: Props) {
   const toPoint = (e: PointerEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current!;
     const rect = canvas.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * MIX_W;
-    const y = ((e.clientY - rect.top) / rect.height) * MIX_H;
+    const x = ((e.clientX - rect.left) / Math.max(1, rect.width)) * canvas.width;
+    const y = ((e.clientY - rect.top) / Math.max(1, rect.height)) * canvas.height;
     return { x, y, inside: true };
   };
 
@@ -370,7 +404,7 @@ export function MixBoard({ color, sampling = false, onUse, onKeep }: Props) {
     const canvas = canvasRef.current;
     if (!canvas) return 22;
     const rect = canvas.getBoundingClientRect();
-    const scale = Math.min(rect.width / MIX_W, rect.height / MIX_H);
+    const scale = rect.width / Math.max(1, canvas.width);
     return Math.max(8, size * scale);
   })();
 
