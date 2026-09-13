@@ -1582,33 +1582,24 @@ export function Studio() {
                   />
                 </PopoverContent>
               </Popover>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button type="button" className="analog-btn analog-chip">
-                    Mix
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent align="end" side="top" className="w-72">
-                  <MixPanel
-                    flow={flow}
-                    smear={smear}
-                    wetness={wetness}
-                    drift={drift}
-                    steady={steady}
-                    onFlow={setFlow}
-                    onSmear={setSmear}
-                    onWetness={setWetness}
-                    onDrift={setDrift}
-                    onSteady={setSteady}
-                  />
-                </PopoverContent>
-              </Popover>
             </div>
             <ToolGrid tool={tool} onTool={setTool} />
             <div className="mt-2 grid grid-cols-2 gap-x-3">
               <SliderField label="Size" value={size} min={SIZE_MIN} max={SIZE_MAX} step={1} onChange={setSize} />
               <SliderField label="Body" value={body} min={0} max={1} step={0.01} onChange={setBody} />
             </div>
+            <MixPanel
+              flow={flow}
+              smear={smear}
+              wetness={wetness}
+              drift={drift}
+              steady={steady}
+              onFlow={setFlow}
+              onSmear={setSmear}
+              onWetness={setWetness}
+              onDrift={setDrift}
+              onSteady={setSteady}
+            />
             </div>
           </div>
         </div>
@@ -1960,9 +1951,9 @@ function MixPanel({
   onSteady: (n: number) => void;
 }) {
   return (
-    <div className="flex flex-col gap-2">
-      <SliderField label="Flow" value={flow} min={0.12} max={1} step={0.01} onChange={onFlow} />
+    <div className="mix-feel mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5">
       <SliderField label="Mix" value={smear} min={0} max={1} step={0.01} onChange={onSmear} />
+      <SliderField label="Flow" value={flow} min={0.12} max={1} step={0.01} onChange={onFlow} />
       <SliderField label="Wet" value={wetness} min={0} max={1} step={0.01} onChange={onWetness} />
       <SliderField label="Steady" value={steady} min={0} max={1} step={0.01} onChange={onSteady} />
       <SliderField label="Drift" value={drift} min={0} max={1} step={0.01} onChange={onDrift} />
