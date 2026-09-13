@@ -326,8 +326,8 @@ textarea,
   }
 
   .picker-shell.is-compact .hue-wheel {
-    width: 4.2rem;
-    height: 4.2rem;
+    width: 3.2rem;
+    height: 3.2rem;
   }
 
   .tool-grid {
@@ -2554,7 +2554,80 @@ body.is-color-drag .canvas-col {
   }
 
   .palette-strip {
-    grid-template-columns: 4.2rem minmax(0, 1fr);
-    align-items: start;
+    grid-template-columns: 5rem minmax(0, 1fr);
+    align-items: center;
+    min-height: 3rem;
+  }
+
+  .palette-strip-name {
+    width: 5rem;
+    min-width: 5rem;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    white-space: normal;
+  }
+
+  .picker-shell.is-compact {
+    gap: 0.25rem;
+  }
+
+  .picker-shell.is-compact .picker-row {
+    gap: 0.45rem;
+    align-items: center;
+  }
+
+  .picker-shell.is-compact .hue-wheel {
+    width: 3.2rem;
+    height: 3.2rem;
+  }
+
+  .picker-shell.is-compact .hue-wheel-core {
+    inset: 24%;
+    border-width: 2px;
+  }
+
+  .picker-shell.is-compact .hue-wheel-knob::after {
+    top: 1px;
+    width: 9px;
+    height: 9px;
+  }
+
+  .picker-shell.is-compact .picker-side {
+    gap: 0.08rem;
+  }
+
+  .picker-shell.is-compact .text-sm {
+    font-size: 11px;
+  }
+
+  .picker-shell.is-compact .tape-counter {
+    font-size: 8px;
+  }
+
+  .picker-shell.is-compact [data-slot="slider-track"] {
+    height: 6px;
+  }
+
+  .picker-shell.is-compact [data-slot="slider-thumb"] {
+    width: 14px;
+    height: 14px;
+  }
+
+  .palette-save-row .analog-btn.analog-chip {
+    height: 36px;
+  }
+
+  .palette-list {
+    flex: 1 1 auto;
+    min-height: 12rem;
+  }
+
+  .palette-list .tube-dot,
+  .palette-list .palette-chip,
+  .palette-board .tube-dot,
+  .palette-board .palette-chip,
+  .tube-rack.color-wheel .tube-dot {
+    width: 2.8rem;
+    height: 2.8rem;
   }
 }
