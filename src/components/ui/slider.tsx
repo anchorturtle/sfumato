@@ -2,11 +2,41 @@ import * as SliderPrimitive from "@radix-ui/react-slider";
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-export function Slider({ className, ...props }: React.ComponentProps<typeof SliderPrimitive.Root>) {
+export function Slider({ className, onPointerDownCapture, ...props }: React.ComponentProps<typeof SliderPrimitive.Root>) {
   return (
     <SliderPrimitive.Root
       data-slot="slider"
-      className={cn("relative flex h-11 w-full touch-none items-center select-none", className)}
+      className={cn("relative flex h-8 w-full touch-pan-y items-center select-none", className)}
+      onPointerDownCapture={(e) => {
+        onPointerDownCapture?.(e);
+        if (e.pointerType !== "touch") return;
+        const root = e.currentTarget;
+        const x0 = e.clientX;
+        const y0 = e.clientY;
+        const id = e.pointerId;
+        let axis: "h" | "v" | null = null;
+        const onMove = (ev: PointerEvent) => {
+          if (ev.pointerId !== id) return;
+          const dx = Math.abs(ev.clientX - x0);
+          const dy = Math.abs(ev.clientY - y0);
+          if (!axis && (dx > 7 || dy > 7)) axis = dy > dx ? "v" : "h";
+          if (axis === "v") {
+            try {
+              root.releasePointerCapture(id);
+            } catch {
+              /* */
+            }
+          }
+        };
+        const onUp = () => {
+          window.removeEventListener("pointermove", onMove, true);
+          window.removeEventListener("pointerup", onUp, true);
+          window.removeEventListener("pointercancel", onUp, true);
+        };
+        window.addEventListener("pointermove", onMove, true);
+        window.addEventListener("pointerup", onUp, true);
+        window.addEventListener("pointercancel", onUp, true);
+      }}
       {...props}
     >
       <SliderPrimitive.Track

@@ -2625,3 +2625,28 @@ body.is-color-drag .canvas-col {
     height: 2.8rem;
   }
 }
+
+[data-slot="slider"] {
+  touch-action: pan-y;
+}
+
+.tools-rail .win-body,
+.palette-rail .win-body,
+.palette-list,
+.focus-pals .win-body {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
+@media (pointer: coarse) {
+  .tools-rail .analog-btn,
+  .palette-rail .analog-btn,
+  .palette-list .analog-btn,
+  .palette-list .tube-dot,
+  .palette-list .palette-chip,
+  .palette-board .tube-dot,
+  .palette-board .palette-chip {
+    touch-action: pan-y;
+  }
+}
