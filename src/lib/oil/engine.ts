@@ -847,8 +847,9 @@ export class OilEngine {
       const py = this.lastY + (ny - this.lastY) * t;
       const pp = this.lastP + (p - this.lastP) * t;
       this.strokeDist += spacing;
-      if (this.params.drift > 0.001 && (tool === "oil" || tool === "glaze" || tool === "impasto")) {
-        this.shiftBrush(this.params.drift * spacing * 0.0018);
+      if (this.params.drift > 0.004 && (tool === "oil" || tool === "glaze" || tool === "impasto")) {
+        const d = this.params.drift * this.params.drift;
+        this.shiftBrush(d * spacing * 0.00042);
       }
       this.stamp(px, py, pp);
     }
