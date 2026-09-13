@@ -11,15 +11,18 @@ const MIX_BASE = 480;
 
 function mixPixels(el: HTMLElement) {
   const r = el.getBoundingClientRect();
+  if (r.width < 24 || r.height < 24) return null;
   const dpr = Math.min(2, window.devicePixelRatio || 1);
-  let w = Math.max(240, Math.round(Math.max(r.width, 1) * dpr));
-  let h = Math.max(180, Math.round(Math.max(r.height, 1) * dpr));
+  let w = Math.max(280, Math.round(r.width * dpr));
+  let h = Math.max(200, Math.round(r.height * dpr));
   const cap = 960;
   if (w > cap || h > cap) {
     const s = cap / Math.max(w, h);
-    w = Math.max(240, Math.round(w * s));
-    h = Math.max(180, Math.round(h * s));
+    w = Math.max(280, Math.round(w * s));
+    h = Math.max(200, Math.round(h * s));
   }
+  w -= w % 2;
+  h -= h % 2;
   return { w, h };
 }
 
@@ -133,7 +136,7 @@ export function MixBoard({ color, sampling = false, onUse, onKeep }: Props) {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const stage = canvas.parentElement ?? canvas;
-    const first = mixPixels(stage);
+    const first = mixPixels(stage) ?? { w: 640, h: 400 };
     const engine = new OilEngine(first.w, first.h, "glass", 48);
     engine.reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     engineRef.current = engine;
@@ -141,6 +144,8 @@ export function MixBoard({ color, sampling = false, onUse, onKeep }: Props) {
     canvas.height = first.h;
     const ctx = canvas.getContext("2d", { alpha: false });
     if (!ctx) return;
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
     ctxRef.current = ctx;
 
     applyMode(engine, "drop", colorRef.current, 56);
@@ -186,12 +191,15 @@ export function MixBoard({ color, sampling = false, onUse, onKeep }: Props) {
 
     const fit = () => {
       if (stopped || engine.isStroking) return;
-      const { w, h } = mixPixels(stage);
-      if (canvas.width === w && canvas.height === h) return;
-      canvas.width = w;
-      canvas.height = h;
-      engine.resize(w, h);
+      const next = mixPixels(stage);
+      if (!next) return;
+      if (Math.abs(canvas.width - next.w) < 16 && Math.abs(canvas.height - next.h) < 16) return;
+      canvas.width = next.w;
+      canvas.height = next.h;
+      engine.resize(next.w, next.h);
       applyMode(engine, modeRef.current, colorRef.current, sizeRef.current);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
       engine.drawTo(ctx);
       kick();
     };

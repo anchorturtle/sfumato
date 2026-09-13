@@ -253,6 +253,8 @@ export function Studio() {
     canvas.height = PAINT_H;
     const ctx = canvas.getContext("2d", { alpha: false });
     if (!ctx) return;
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
     ctxRef.current = ctx;
 
     const saved = loadSettings();
@@ -294,7 +296,7 @@ export function Studio() {
       const dt = Math.min(0.1, (ts - last) / 1000);
       const stroking = engine.isStroking;
       const keep = engine.tick(dt, ts);
-      engine.present(ctx, stroking || keep);
+      engine.present(ctx, stroking);
       if (keep || stroking) {
         rafRef.current = requestAnimationFrame(loop);
       } else {
@@ -1474,7 +1476,6 @@ export function Studio() {
                 height: viewBox.fitH,
                 transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
                 transformOrigin: "0 0",
-                willChange: "transform",
               }}
             >
               <div className="absolute inset-0 overflow-hidden rounded-lg bg-frame p-1.5 shadow-[var(--shadow-border)] md:rounded-xl md:p-1.5">

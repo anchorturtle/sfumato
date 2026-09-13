@@ -229,20 +229,37 @@ export class OilEngine {
     this.tilesY = Math.ceil(height / TILE);
     this.tileWet = new Uint16Array(this.tilesX * this.tilesY);
     for (let y = 0; y < height; y++) {
-      const sy = Math.min(oldH - 1, Math.round((y + 0.5) * (oldH / height) - 0.5));
+      const sy = (y + 0.5) * (oldH / height) - 0.5;
+      const y0 = sy < 0 ? 0 : sy >= oldH - 1 ? oldH - 1 : sy | 0;
+      const y1 = y0 + 1 < oldH ? y0 + 1 : y0;
+      const fy = sy < 0 ? 0 : sy >= oldH - 1 ? 0 : sy - y0;
       for (let x = 0; x < width; x++) {
-        const sx = Math.min(oldW - 1, Math.round((x + 0.5) * (oldW / width) - 0.5));
-        const si = (sy * oldW + sx) * 4;
+        const sx = (x + 0.5) * (oldW / width) - 0.5;
+        const x0 = sx < 0 ? 0 : sx >= oldW - 1 ? oldW - 1 : sx | 0;
+        const x1 = x0 + 1 < oldW ? x0 + 1 : x0;
+        const fx = sx < 0 ? 0 : sx >= oldW - 1 ? 0 : sx - x0;
+        const i00 = (y0 * oldW + x0) * 4;
+        const i10 = (y0 * oldW + x1) * 4;
+        const i01 = (y1 * oldW + x0) * 4;
+        const i11 = (y1 * oldW + x1) * 4;
         const di = (y * width + x) * 4;
-        this.rgba[di] = oldRgba[si]!;
-        this.rgba[di + 1] = oldRgba[si + 1]!;
-        this.rgba[di + 2] = oldRgba[si + 2]!;
-        this.rgba[di + 3] = oldRgba[si + 3]!;
-        const sp = sy * oldW + sx;
+        for (let c = 0; c < 4; c++) {
+          const v0 = oldRgba[i00 + c]! + (oldRgba[i10 + c]! - oldRgba[i00 + c]!) * fx;
+          const v1 = oldRgba[i01 + c]! + (oldRgba[i11 + c]! - oldRgba[i01 + c]!) * fx;
+          this.rgba[di + c] = v0 + (v1 - v0) * fy;
+        }
+        const p00 = y0 * oldW + x0;
+        const p10 = y0 * oldW + x1;
+        const p01 = y1 * oldW + x0;
+        const p11 = y1 * oldW + x1;
         const dp = y * width + x;
-        this.wet[dp] = oldWet[sp]!;
-        this.thick[dp] = oldThick[sp]!;
-        this.mask[dp] = oldMask[sp]!;
+        const w0 = oldWet[p00]! + (oldWet[p10]! - oldWet[p00]!) * fx;
+        const w1 = oldWet[p01]! + (oldWet[p11]! - oldWet[p01]!) * fx;
+        this.wet[dp] = w0 + (w1 - w0) * fy;
+        const t0 = oldThick[p00]! + (oldThick[p10]! - oldThick[p00]!) * fx;
+        const t1 = oldThick[p01]! + (oldThick[p11]! - oldThick[p01]!) * fx;
+        this.thick[dp] = t0 + (t1 - t0) * fy;
+        this.mask[dp] = oldMask[p00]!;
       }
     }
     this.hasMask = this.mask.some((v) => v > 8);
@@ -677,11 +694,11 @@ export class OilEngine {
 
   private blit(ctx: CanvasRenderingContext2D) {
     const b = this.blitRect;
-    if (b.all || b.w <= 0 || b.h <= 0) {
-      ctx.putImageData(this.display, 0, 0);
+    if (this.stroking && !b.all && b.w > 0 && b.h > 0) {
+      ctx.putImageData(this.display, 0, 0, b.x, b.y, b.w, b.h);
       return;
     }
-    ctx.putImageData(this.display, 0, 0, b.x, b.y, b.w, b.h);
+    ctx.putImageData(this.display, 0, 0);
   }
 
   drawTo(ctx: CanvasRenderingContext2D) {
