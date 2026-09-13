@@ -7,8 +7,8 @@ import { rgbToHex, hexToRgb } from "@/lib/oil/pigments";
 import { clearMixBoard, loadMixBoard, saveMixBoard } from "@/lib/oil/persist";
 import { cn } from "@/lib/utils";
 
-const MIX_W = 440;
-const MIX_H = 440;
+const MIX_W = 640;
+const MIX_H = 640;
 
 type MixMode = "drop" | "blend" | "knife" | "swirl" | "pick";
 
@@ -411,7 +411,7 @@ export function MixBoard({ color, sampling = false, onUse, onKeep }: Props) {
         <canvas
           ref={canvasRef}
           data-mix-board
-          className="h-full w-full touch-none select-none"
+          className="touch-none select-none"
           style={{ cursor: sampling || mode === "pick" ? "crosshair" : "none", touchAction: "none" }}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}

@@ -255,9 +255,12 @@ textarea,
     pointer-events: auto;
   }
 
-  .mix-rail,
+  .mix-rail {
+    height: min(50dvh, 26rem);
+  }
+
   .palette-rail {
-    height: min(68dvh, 34rem);
+    height: min(62dvh, 32rem);
   }
 
   .mix-rail .orbit-win,
@@ -594,8 +597,10 @@ textarea,
 }
 
 .mix-stage {
+  display: grid;
   min-height: 12rem;
   flex: 1 1 auto;
+  place-items: center;
   overflow: hidden;
   border-radius: 12px;
   background: rgb(12 10 32 / 0.55);
@@ -607,8 +612,12 @@ textarea,
 
 .mix-stage canvas {
   display: block;
-  width: 100%;
-  height: 100%;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  aspect-ratio: 1;
+  image-rendering: auto;
 }
 
 .tube-dot {
@@ -1772,12 +1781,28 @@ body.is-color-drag .canvas-col {
 
 .studio-shell.is-focus .canvas-col {
   min-height: 0;
+  height: 100%;
   padding: 0;
 }
 
 .studio-shell.is-focus .canvas-win .win-body {
   padding: 0;
   overflow: hidden;
+}
+
+.studio-shell.is-focus .canvas-stage {
+  display: grid;
+  height: 100%;
+  min-height: 0;
+  flex: 1;
+  place-items: center;
+}
+
+.studio-shell.is-focus .canvas-fit {
+  width: min(100%, calc(100cqh * 4 / 3));
+  height: min(100%, calc(100cqw * 3 / 4));
+  max-width: 100%;
+  max-height: 100%;
 }
 
 .dock-logo-wrap {
@@ -2002,17 +2027,19 @@ body.is-color-drag .canvas-col {
 
 .focus-hud {
   position: fixed;
-  top: 50%;
+  top: max(0.4rem, env(safe-area-inset-top));
+  bottom: max(0.4rem, env(safe-area-inset-bottom));
   left: max(0.35rem, env(safe-area-inset-left));
   z-index: 80;
   display: flex;
-  width: 6.3rem;
-  max-height: calc(100dvh - 0.8rem);
+  width: 5.6rem;
+  max-height: none;
   flex-direction: column;
   align-items: stretch;
-  gap: 5px;
-  padding: 8px 6px;
-  overflow: hidden;
+  gap: 4px;
+  padding: 6px 5px;
+  overflow-x: hidden;
+  overflow-y: auto;
   border: 1px solid rgb(126 200 227 / 0.55);
   border-radius: 16px;
   background: rgb(8 6 24 / 0.94);
@@ -2022,8 +2049,8 @@ body.is-color-drag .canvas-col {
     0 0 28px rgb(126 200 227 / 0.18);
   color: var(--baby-blue);
   pointer-events: auto;
-  touch-action: manipulation;
-  transform: translateY(-50%);
+  touch-action: pan-y;
+  transform: none;
   transition:
     opacity 180ms var(--ease-out),
     transform 180ms var(--ease-out);
@@ -2032,7 +2059,7 @@ body.is-color-drag .canvas-col {
 .focus-hud.is-away {
   opacity: 0;
   pointer-events: none;
-  transform: translate(-120%, -50%);
+  transform: translateX(-120%);
 }
 
 .focus-peek {
@@ -2062,7 +2089,7 @@ body.is-color-drag .canvas-col {
 .focus-pals {
   position: fixed;
   top: 50%;
-  left: calc(6.8rem + env(safe-area-inset-left, 0px));
+  left: calc(6.1rem + env(safe-area-inset-left, 0px));
   z-index: 81;
   display: flex;
   width: min(20rem, calc(100vw - 7.4rem));
@@ -2120,36 +2147,34 @@ body.is-color-drag .canvas-col {
 .focus-hud-actions .focus-btn {
   width: 100%;
   min-width: 0;
-  height: 38px;
+  height: 34px;
   flex: none;
 }
 
 .focus-size-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-areas:
-    "num num"
-    "minus plus";
-  align-items: stretch;
-  gap: 4px;
+  grid-template-columns: 1fr auto 1fr;
+  grid-template-areas: "minus num plus";
+  align-items: center;
+  gap: 3px;
   grid-column: 1 / -1;
 }
 
 .focus-size {
   grid-area: num;
-  min-width: 0;
-  padding: 2px 0 0;
+  min-width: 1.6rem;
+  padding: 0;
   color: var(--baby-blue);
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.04em;
   line-height: 1;
   text-align: center;
 }
 
 .focus-size-row .focus-size-btn {
-  height: 48px;
-  min-height: 48px;
+  height: 34px;
+  min-height: 34px;
 }
 
 .focus-size-row .focus-size-btn:first-of-type {
@@ -2226,11 +2251,10 @@ body.is-color-drag .canvas-col {
 
 .focus-swatch {
   display: block;
-  width: 100%;
-  min-width: 0;
-  height: 28px;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
   grid-column: 1 / -1;
-  align-self: center;
   justify-self: center;
   border: 2px solid #fff;
   border-radius: 999px;
