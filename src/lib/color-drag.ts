@@ -42,8 +42,11 @@ function onLost(ev?: Event) {
 function onMove(ev: PointerEvent) {
   const s = session;
   if (!s || ev.pointerId !== s.id) return;
-  const dist = Math.hypot(ev.clientX - s.x0, ev.clientY - s.y0);
+  const dx = ev.clientX - s.x0;
+  const dy = ev.clientY - s.y0;
+  const dist = Math.hypot(dx, dy);
   if (dist < 14) return;
+  if (Math.abs(dy) > Math.abs(dx) + 2) return;
   s.dragged = true;
   ev.preventDefault();
   moveColorGhost(s.hex, ev.clientX, ev.clientY);

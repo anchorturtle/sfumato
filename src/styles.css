@@ -2037,18 +2037,21 @@ body.is-color-drag .canvas-col {
 .focus-hud {
   position: fixed;
   top: max(0.4rem, env(safe-area-inset-top));
-  bottom: max(0.4rem, env(safe-area-inset-bottom));
+  bottom: auto;
   left: max(0.35rem, env(safe-area-inset-left));
   z-index: 80;
   display: flex;
   width: 5.6rem;
-  max-height: none;
+  max-height: calc(100svh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 0.8rem);
+  min-height: 0;
   flex-direction: column;
   align-items: stretch;
   gap: 4px;
   padding: 6px 5px;
   overflow-x: hidden;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   border: 1px solid rgb(126 200 227 / 0.55);
   border-radius: 16px;
   background: rgb(8 6 24 / 0.94);
@@ -2097,12 +2100,14 @@ body.is-color-drag .canvas-col {
 
 .focus-pals {
   position: fixed;
-  top: 50%;
+  top: max(0.4rem, env(safe-area-inset-top));
+  bottom: max(0.4rem, env(safe-area-inset-bottom));
   left: calc(6.1rem + env(safe-area-inset-left, 0px));
   z-index: 81;
   display: flex;
   width: min(20rem, calc(100vw - 7.4rem));
-  max-height: min(72dvh, 34rem);
+  max-height: none;
+  min-height: 0;
   flex-direction: column;
   overflow: hidden;
   border: 1px solid rgb(126 200 227 / 0.45);
@@ -2112,7 +2117,7 @@ body.is-color-drag .canvas-col {
     0 16px 40px rgb(0 0 0 / 0.55),
     0 0 0 1px rgb(123 47 255 / 0.25);
   backdrop-filter: blur(22px) saturate(1.6);
-  transform: translateY(-50%);
+  transform: none;
 }
 
 .focus-pals .sheet-close {
@@ -2120,15 +2125,24 @@ body.is-color-drag .canvas-col {
 }
 
 .focus-pals .win-body {
+  flex: 1;
   min-height: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden;
   overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
 }
 
 .palette-board.is-compact {
   gap: 0.35rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
+.palette-board.is-compact .palette-list {
+  flex: none;
+  overflow: visible;
+  min-height: 0;
 }
 
 .palette-board.is-compact .hue-wheel {
@@ -2654,6 +2668,60 @@ body.is-color-drag .canvas-col {
   .palette-list .palette-chip,
   .palette-board .tube-dot,
   .palette-board .palette-chip {
+    touch-action: pan-y;
+  }
+}
+
+@media (max-width: 767px) {
+  .focus-hud {
+    width: 4.5rem;
+    max-height: calc(100svh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 0.7rem);
+    padding: 4px;
+    gap: 3px;
+  }
+
+  .focus-btn,
+  .focus-hud-tools .focus-btn,
+  .focus-hud-actions .focus-btn,
+  .focus-size-row .focus-size-btn {
+    height: 28px;
+    min-height: 28px;
+  }
+
+  .focus-swatch {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+  }
+
+  .focus-nav-label,
+  .focus-exit,
+  .focus-hud-actions .focus-exit,
+  .focus-hud-actions .focus-btn[aria-label="Hide tools"] {
+    min-height: 30px;
+    font-size: 8px;
+  }
+
+  .focus-pals {
+    top: max(0.4rem, env(safe-area-inset-top));
+    bottom: max(0.4rem, env(safe-area-inset-bottom));
+    left: calc(4.95rem + env(safe-area-inset-left, 0px));
+    right: 0.4rem;
+    width: auto;
+    max-height: none;
+    transform: none;
+  }
+
+  .focus-pals .win-body {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    touch-action: pan-y;
+  }
+
+  .palette-board.is-compact {
+    height: 100%;
+    overflow-y: auto;
     touch-action: pan-y;
   }
 }
