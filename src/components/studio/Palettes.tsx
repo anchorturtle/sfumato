@@ -132,10 +132,8 @@ export function TubeSlider({ hex, onPick }: { hex: string; onPick: PickFn }) {
             style={{ ["--pigment" as string]: p.hex }}
             onPointerDown={(e) => {
               if (e.button !== 0) return;
-              onPick(p.hex, p.id);
-              startColorDrag(p.hex, e.pointerId, e.clientX, e.clientY);
+              startColorDrag(p.hex, e.pointerId, e.clientX, e.clientY, () => onPick(p.hex, p.id));
             }}
-            onClick={() => onPick(p.hex, p.id)}
           >
             <span className="pigment-well block size-full rounded-full" />
           </button>
@@ -257,10 +255,8 @@ function Swatch({
       style={{ ["--pigment" as string]: hex }}
       onPointerDown={(e) => {
         if (e.button !== 0) return;
-        onPick();
-        startColorDrag(hex, e.pointerId, e.clientX, e.clientY);
+        startColorDrag(hex, e.pointerId, e.clientX, e.clientY, onPick);
       }}
-      onClick={() => onPick()}
     >
       <span className="pigment-well block size-full rounded-full" />
     </button>

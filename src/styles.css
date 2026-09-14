@@ -647,6 +647,12 @@ textarea,
 .tube-dot,
 .palette-chip,
 .focus-swatch {
+  touch-action: pan-x pan-y;
+}
+
+body.is-color-drag .tube-dot,
+body.is-color-drag .palette-chip,
+body.is-color-drag .focus-swatch {
   touch-action: none;
 }
 
