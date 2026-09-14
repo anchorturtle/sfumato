@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
 import { Blend, Droplets, Minus, Pipette, Plus, Redo2, Undo2, Wind, X } from "lucide-react";
-import { TubeSlider } from "@/components/studio/Palettes";
+import { TubeRack } from "@/components/studio/Palettes";
 import { Slider } from "@/components/ui/slider";
 import { OilEngine } from "@/lib/oil/engine";
 import { rgbToHex, hexToRgb } from "@/lib/oil/pigments";
@@ -492,7 +492,7 @@ export function MixBoard({ color, sampling = false, onUse, onKeep }: Props) {
         )}
       </div>
 
-      <TubeSlider
+      <TubeRack
         hex={hex}
         onPick={(h) => {
           const rgb = hexToRgb(h);
@@ -503,6 +503,8 @@ export function MixBoard({ color, sampling = false, onUse, onKeep }: Props) {
           if (next !== mode) setMode(next);
           applyMode(engine, next, rgb, size);
         }}
+        compact
+        scroll
       />
 
       <div className="mix-foot flex shrink-0 items-center gap-2">

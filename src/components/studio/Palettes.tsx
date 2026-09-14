@@ -1,6 +1,5 @@
 import { Plus, Save, X } from "lucide-react";
 import { ColorPicker } from "@/components/studio/ColorPicker";
-import { Slider } from "@/components/ui/slider";
 import { ARTIST_PALETTES, JESTR_PALETTE, THEME_PALETTES, type ArtistPalette } from "@/lib/oil/palettes";
 import { PIGMENTS, rgbToHex } from "@/lib/oil/pigments";
 import { startColorDrag } from "@/lib/color-drag";
@@ -97,7 +96,7 @@ export function PaletteRail({
           />
         ))}
         <p className="tape-counter">Tubes</p>
-        <TubeSlider hex={hex} onPick={onPick} />
+        <TubeRack hex={hex} onPick={onPick} scroll />
         <p className="tape-counter">Themes</p>
         {THEME_PALETTES.map((p) => (
           <PaletteStrip key={p.id} palette={p} hex={hex} onPick={onPick} />
@@ -107,49 +106,6 @@ export function PaletteRail({
           <PaletteStrip key={p.id} palette={p} hex={hex} onPick={onPick} />
         ))}
       </div>
-    </div>
-  );
-}
-
-export function TubeSlider({ hex, onPick }: { hex: string; onPick: PickFn }) {
-  const selected = hex.toLowerCase();
-  const i = Math.max(0, PIGMENTS.findIndex((p) => p.hex.toLowerCase() === selected));
-  const current = PIGMENTS[i] ?? PIGMENTS[0]!;
-  return (
-    <div className="tube-slider">
-      <span className="tube-slider-head">
-        <span className="tape-counter">Tube</span>
-        <span className="symbol-slider-name">{current.name}</span>
-      </span>
-      <div className="tube-slider-row">
-        {PIGMENTS.map((p) => (
-          <button
-            key={p.id}
-            type="button"
-            aria-label={p.name}
-            aria-pressed={p.hex.toLowerCase() === selected}
-            className={cn("tube-dot", p.hex.toLowerCase() === selected && "is-on")}
-            style={{ ["--pigment" as string]: p.hex }}
-            onPointerDown={(e) => {
-              if (e.button !== 0) return;
-              startColorDrag(p.hex, e.pointerId, e.clientX, e.clientY, () => onPick(p.hex, p.id));
-            }}
-          >
-            <span className="pigment-well block size-full rounded-full" />
-          </button>
-        ))}
-      </div>
-      <Slider
-        min={0}
-        max={PIGMENTS.length - 1}
-        step={1}
-        value={[i]}
-        onValueChange={(v) => {
-          const p = PIGMENTS[v[0] ?? 0];
-          if (p) onPick(p.hex, p.id);
-        }}
-        aria-label="Paint tube"
-      />
     </div>
   );
 }
@@ -166,19 +122,28 @@ export function TubeRack({
   scroll?: boolean;
 }) {
   const selected = hex.toLowerCase();
+  const current = PIGMENTS.find((p) => p.hex.toLowerCase() === selected);
   return (
-    <div className={cn("tube-rack color-wheel", compact && "is-compact", scroll && "is-scroll")} role="listbox" aria-label="Paint tubes">
-      <div className="color-wheel-track">
-      {PIGMENTS.map((p) => (
-        <Swatch
-          key={p.id}
-          hex={p.hex}
-          label={p.name}
-          on={p.hex.toLowerCase() === selected}
-          className="tube-dot"
-          onPick={() => onPick(p.hex, p.id)}
-        />
-      ))}
+    <div className={cn("tube-rack", compact && "is-compact", scroll && "is-scroll")}>
+      {current && (
+        <span className="tube-slider-head">
+          <span className="tape-counter">Tube</span>
+          <span className="symbol-slider-name">{current.name}</span>
+        </span>
+      )}
+      <div className="tube-scroll color-wheel">
+        <div className="color-wheel-track">
+          {PIGMENTS.map((p) => (
+            <Swatch
+              key={p.id}
+              hex={p.hex}
+              label={p.name}
+              on={p.hex.toLowerCase() === selected}
+              className="tube-dot"
+              onPick={() => onPick(p.hex, p.id)}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
