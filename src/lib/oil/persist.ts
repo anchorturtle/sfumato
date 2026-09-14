@@ -7,9 +7,9 @@ const STORE = "paint";
 const KEY = "current";
 const MIX_KEY = "mixboard";
 const HISTORY_KEY = "history";
-const SETTINGS_KEY = "sfumato:settings:v5";
+const SETTINGS_KEY = "sfumato:settings:v6";
 const MIX_GROUND_KEY = "sfumato:mix-ground:v1";
-const SAVE_VERSION = 5;
+const SAVE_VERSION = 6;
 
 export type StudioSettings = {
   version: number;
@@ -29,6 +29,8 @@ export type StudioSettings = {
   stencil: StencilForm;
   ground: GroundId;
   presetId: PresetId;
+  lightU: number;
+  lightV: number;
 };
 
 export const DEFAULT_SETTINGS: StudioSettings = {
@@ -49,6 +51,8 @@ export const DEFAULT_SETTINGS: StudioSettings = {
   stencil: "free",
   ground: "linen",
   presetId: "studio",
+  lightU: 0.42,
+  lightV: -0.48,
 };
 
 const TOOLS: OilTool[] = [
@@ -66,12 +70,15 @@ const TOOLS: OilTool[] = [
   "stencil",
   "blend",
   "swirl",
+  "splat",
+  "drip",
 ];
 
 export function loadSettings(): StudioSettings {
   try {
     const raw =
       localStorage.getItem(SETTINGS_KEY) ??
+      localStorage.getItem("sfumato:settings:v5") ??
       localStorage.getItem("sfumato:settings:v4") ??
       localStorage.getItem("sfumato:settings:v3") ??
       localStorage.getItem("sfumato:settings:v2") ??
@@ -102,6 +109,8 @@ export function loadSettings(): StudioSettings {
     next.smear = clamp01(next.smear);
     next.wetness = clamp01(next.wetness);
     next.body = clamp01(next.body);
+    next.lightU = clamp11(next.lightU ?? DEFAULT_SETTINGS.lightU);
+    next.lightV = clamp11(next.lightV ?? DEFAULT_SETTINGS.lightV);
     next.size = Math.max(2, Math.min(520, next.size || DEFAULT_SETTINGS.size));
     if ((parsed.version ?? 0) < 5) {
       next.flow = DEFAULT_SETTINGS.flow;
@@ -118,6 +127,10 @@ export function loadSettings(): StudioSettings {
 
 function clamp01(n: number) {
   return Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : 0;
+}
+
+function clamp11(n: number) {
+  return Number.isFinite(n) ? Math.max(-1, Math.min(1, n)) : 0;
 }
 
 export function saveSettings(s: StudioSettings) {

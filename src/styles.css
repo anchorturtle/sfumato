@@ -461,7 +461,7 @@ textarea,
 
   .tools-strip {
     display: grid !important;
-    grid-template-columns: auto auto repeat(7, minmax(0, 1fr));
+    grid-template-columns: auto auto auto repeat(7, minmax(0, 1fr));
     flex-direction: unset;
     gap: 6px 8px;
     align-items: end;
@@ -3195,4 +3195,29 @@ body.is-color-drag .canvas-col {
   height: 14px;
   background: radial-gradient(circle, currentColor 1.2px, transparent 1.4px);
   background-size: 4px 4px;
+}
+
+.light-orb {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  align-self: center;
+  border-radius: 999px;
+  border: 1px solid rgb(126 200 227 / 0.45);
+  background:
+    radial-gradient(circle at var(--hx, 70%) var(--hy, 28%), #fff 0 7%, rgb(126 200 227 / 0.95) 16%, rgb(123 47 255 / 0.5) 40%, rgb(8 6 24 / 0.96) 72%);
+  box-shadow:
+    inset 0 -8px 14px rgb(0 0 0 / 0.45),
+    inset 0 6px 10px rgb(255 255 255 / 0.16),
+    0 0 18px rgb(123 47 255 / 0.35);
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.focus-hud .light-orb {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  flex: none;
+  grid-column: 1 / -1;
 }

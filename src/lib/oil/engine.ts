@@ -16,7 +16,9 @@ export type OilTool =
   | "sample"
   | "stencil"
   | "blend"
-  | "swirl";
+  | "swirl"
+  | "splat"
+  | "drip";
 
 export type MaskMode = "off" | "inside" | "outside";
 export type StencilForm = "free" | "circle" | "oval" | "rect";
@@ -104,6 +106,8 @@ export class OilEngine {
   reducedMotion = false;
   onChange: (() => void) | null = null;
   surface: GroundId;
+  lightU = 0.42;
+  lightV = -0.48;
 
 
   private linen: Float32Array;
@@ -147,6 +151,7 @@ export class OilEngine {
   private painted = false;
   private hasMask = false;
   private marqueeBox: Marquee | null = null;
+  private splatting = false;
 
   constructor(width: number, height: number, surface: GroundId = "linen", undoLimit = UNDO_LIMIT) {
     this.width = width;
@@ -186,6 +191,15 @@ export class OilEngine {
   }
   get marquee(): Marquee | null {
     return this.marqueeBox;
+  }
+
+  setLight(u: number, v: number) {
+    const d = Math.hypot(u, v);
+    const s = d > 1 ? 1 / d : 1;
+    this.lightU = u * s;
+    this.lightV = v * s;
+    this.markAllDirty();
+    this.emit();
   }
 
   setParams(partial: Partial<OilParams>) {
@@ -682,11 +696,15 @@ export class OilEngine {
   tick(dt: number, now: number) {
     this.time = now * 0.001;
     if (this.stroking) return true;
-    if (!this.params.magic || !this.hasWet || this.reducedMotion) return false;
+    if (this.reducedMotion) return false;
     this.dryAcc += dt;
-    if (this.dryAcc < 0.07) return true;
-    this.diffuse(this.dryAcc);
+    if (this.dryAcc < 0.05) return this.hasWet;
+    const step = this.dryAcc;
     this.dryAcc = 0;
+    if (this.hasWet) {
+      this.drip(step);
+      this.diffuse(step);
+    }
     return this.hasWet;
   }
 
@@ -820,7 +838,7 @@ export class OilEngine {
     const { size } = brushScale(this.params.brush);
     const tool = this.params.tool;
     const tscale =
-      tool === "knife" || tool === "scrape" ? 1.22 : tool === "impasto" ? 1.12 : tool === "soften" || tool === "blend" || tool === "swirl" ? 1.22 : 1;
+      tool === "knife" || tool === "scrape" ? 1.22 : tool === "impasto" ? 1.12 : tool === "splat" ? 0.82 : tool === "drip" ? 0.72 : tool === "soften" || tool === "blend" || tool === "swirl" ? 1.22 : 1;
     const dyn = 0.14 + 0.86 * pressure;
     const lean = 1 - 0.3 * clamp(this.lastSpeed / Math.max(28, this.params.size * 0.9), 0, 1);
     return Math.max(1.6, this.params.size * size * tscale * dyn * lean);
@@ -874,6 +892,9 @@ export class OilEngine {
         this.shiftBrush(d * spacing * 0.00042);
       }
       this.stamp(px, py, pp);
+      if (!this.splatting && (tool === "splat" || tool === "drip" || ((tool === "oil" || tool === "impasto") && this.params.drift > 0.18 && this.lastSpeed > this.params.size * 0.38))) {
+        this.spray(px, py, pp, radius, tool === "drip");
+      }
     }
     this.smoothX = nx;
     this.smoothY = ny;
@@ -1115,6 +1136,8 @@ export class OilEngine {
     else if (tool === "glaze") thickAmt *= 0.05;
     else if (tool === "dry") thickAmt *= 0.22;
     else if (tool === "oil") thickAmt *= 0.9;
+    else if (tool === "splat") thickAmt *= 0.72;
+    else if (tool === "drip") thickAmt *= 0.28;
     else if (tool === "smudge") thickAmt = body * 0.12;
     else thickAmt = 0;
 
@@ -1330,9 +1353,11 @@ export class OilEngine {
         if (thickAmt > 0) {
           const groove = this.stroking ? 1 : hairGroove(v, ry, shape);
           const bead = 0.7 + 0.4 * Math.min(1, Math.abs(v) / Math.max(ry, 0.001));
-          const tAdd = thickAmt * k * groove * bead * 255;
-          const remain = 1 - destT * 0.38;
-          thick[p] = clamp((thick[p]! + tAdd * remain) | 0, 0, 255);
+          const weight = Math.pow(Math.max(0.035, body), 2.25);
+          const head = Math.exp(-destT * (1.85 - body * 1.1));
+          const pile = destT * destT * weight * 0.42;
+          const tAdd = (weight * 1.28 + pile) * k * groove * bead * pressure * flow * 255 * head;
+          thick[p] = clamp((thick[p]! + tAdd) | 0, 0, 255);
         }
 
         const nw = Math.max(wet[p]!, Math.round(wetDeposit * k));
@@ -1386,6 +1411,84 @@ export class OilEngine {
     this.expandDirty(x0, y0, x1 + 1, y1 + 1);
     this.markAllDirty();
     this.composite();
+  }
+
+  private spray(cx: number, cy: number, pressure: number, radius: number, drip: boolean) {
+    if (this.splatting) return;
+    this.splatting = true;
+    const n = drip ? 2 + ((hash2(cx, cy) * 3) | 0) : 3 + ((hash2(cx * 0.17, cy * 0.13) * 5) | 0);
+    const savedSize = this.params.size;
+    const savedBrush = this.params.brush;
+    const savedTool = this.params.tool;
+    this.params.brush = "round";
+    if (drip) this.params.tool = "oil";
+    for (let i = 0; i < n; i++) {
+      const h = hash2(cx + i * 19.1, cy + i * 7.3);
+      const h2 = hash2(cy + i * 11.7, cx + i * 3.9);
+      const ang = drip ? Math.PI * 0.5 + (h - 0.5) * 0.55 : h * Math.PI * 2;
+      const dist = radius * (drip ? 0.8 + h2 * 2.8 : 0.55 + h2 * 2.6) * (0.45 + pressure);
+      const dropR = radius * (drip ? 0.12 + h * 0.22 : 0.07 + h * 0.2);
+      this.params.size = Math.max(2.2, dropR);
+      this.stamp(cx + Math.cos(ang) * dist, cy + Math.sin(ang) * dist, pressure * (0.35 + h2 * 0.5));
+    }
+    this.params.size = savedSize;
+    this.params.brush = savedBrush;
+    this.params.tool = savedTool;
+    this.splatting = false;
+  }
+
+  private drip(dt: number) {
+    const w = this.width;
+    const h = this.height;
+    const rgba = this.rgba;
+    const wet = this.wet;
+    const thick = this.thick;
+    const g = clamp(dt * 2.6, 0, 0.4);
+    this.checker ^= 1;
+    const phase = this.checker;
+    for (let y = h - 2; y >= 0; y--) {
+      for (let x = 0; x < w; x++) {
+        if (((x + y) & 1) !== phase) continue;
+        const p = y * w + x;
+        const wv = wet[p]!;
+        const th = thick[p]!;
+        const i = p * 4;
+        const a = rgba[i + 3]!;
+        if (wv < 96 || a < 18 || th > 150) continue;
+        const fluid = (wv / 255) * (1 - th / 255) * (1 - th / 255);
+        if (fluid < 0.14) continue;
+        const carry = fluid * g * 0.62;
+        if (carry < 0.01) continue;
+        const np = p + w;
+        const ni = np * 4;
+        const da = rgba[ni + 3]!;
+        const srcA = (a / 255) * carry;
+        const dstA = da / 255;
+        const outA = srcA + dstA * (1 - srcA);
+        if (outA > 0.002) {
+          const sr = SRGB_TO_LINEAR[rgba[i]!]!;
+          const sg = SRGB_TO_LINEAR[rgba[i + 1]!]!;
+          const sb = SRGB_TO_LINEAR[rgba[i + 2]!]!;
+          const dr = SRGB_TO_LINEAR[rgba[ni]!]!;
+          const dg = SRGB_TO_LINEAR[rgba[ni + 1]!]!;
+          const db = SRGB_TO_LINEAR[rgba[ni + 2]!]!;
+          const keep = dstA * (1 - srcA);
+          rgba[ni] = linToByte((sr * srcA + dr * keep) / outA);
+          rgba[ni + 1] = linToByte((sg * srcA + dg * keep) / outA);
+          rgba[ni + 2] = linToByte((sb * srcA + db * keep) / outA);
+          rgba[ni + 3] = Math.round(outA * 255);
+        }
+        const moveW = Math.round(wv * carry);
+        wet[np] = clamp(wet[np]! + moveW, 0, 255);
+        wet[p] = clamp(wv - moveW, 0, 255);
+        const moveT = Math.round(th * carry * 0.35);
+        thick[np] = clamp(thick[np]! + moveT, 0, 255);
+        thick[p] = clamp(th - moveT, 0, 255);
+        rgba[i + 3] = Math.round(a * (1 - carry * 0.55));
+        this.noteWet(x, y + 1, wet[np]!);
+        this.expandDirty(x - 1, y, x + 2, y + 2);
+      }
+    }
   }
 
   private diffuse(dt: number) {
@@ -1539,9 +1642,13 @@ export class OilEngine {
     const stencilTool = this.params.tool === "stencil";
     const showMask = this.hasMask && (stencilTool || this.params.maskMode !== "off");
     const t = this.time;
-    const lx = 0.58 + (magic ? Math.cos(t * 0.09) * 0.05 : 0);
-    const ly = -0.62 + (magic ? Math.sin(t * 0.07) * 0.04 : 0);
-    const lz = 0.52;
+    let lx = this.lightU + (magic ? Math.cos(t * 0.09) * 0.04 : 0);
+    let ly = this.lightV + (magic ? Math.sin(t * 0.07) * 0.03 : 0);
+    let lz = Math.sqrt(Math.max(0.04, 1 - this.lightU * this.lightU - this.lightV * this.lightV));
+    const llen = Math.hypot(lx, ly, lz) || 1;
+    lx /= llen;
+    ly /= llen;
+    lz /= llen;
     const surface = groundOf(this.surface);
     const linenR = SRGB_TO_LINEAR[surface.rgb[0]]!;
     const linenG = SRGB_TO_LINEAR[surface.rgb[1]]!;
@@ -1581,34 +1688,46 @@ export class OilEngine {
 
           const ht = thick[p]! / 255;
           const wv = wet[p]! / 255;
-          if (!lite && ht > 0.03) {
+          if (ht > 0.02) {
             const left = x > 0 ? thick[p - 1]! : thick[p]!;
             const right = x + 1 < w ? thick[p + 1]! : thick[p]!;
             const up = y > 0 ? thick[p - w]! : thick[p]!;
             const down = y + 1 < h ? thick[p + w]! : thick[p]!;
-            let nx = (left - right) * 0.014;
-            let ny = (up - down) * 0.014;
-            let nz = 0.55;
+            let nx = (left - right) * (0.02 + ht * 0.028);
+            let ny = (up - down) * (0.02 + ht * 0.028);
+            let nz = 0.4;
             const inv = 1 / Math.max(0.001, Math.hypot(nx, ny, nz));
             nx *= inv;
             ny *= inv;
             nz *= inv;
             const ndl = Math.max(0, nx * lx + ny * ly + nz * lz);
-            const form = (ndl - 0.42) * ht * 0.7;
+            const form = (ndl - 0.32) * ht * 0.95;
             r += form * pr;
             g += form * pg;
             b += form * pb;
             const neigh = (left + right + up + down) * 0.25 / 255;
             const valley = Math.max(0, neigh - ht);
-            const ao = 1 - valley * 0.55;
+            const ao = 1 - valley * 0.62;
             r *= ao;
             g *= ao;
             b *= ao;
-            if (wv > 0.06) {
-              const spec = ndl * ndl * ndl * ndl * ndl * wv * ht * 0.2;
-              r += spec * (0.35 + pr * 0.65);
-              g += spec * (0.32 + pg * 0.65);
-              b += spec * (0.26 + pb * 0.6);
+            const reach = 1.6 + ht * 6.2;
+            let occ = 0;
+            for (let s = 1; s <= 3; s++) {
+              const sx = clamp((x - lx * ((reach * s) / 3)) | 0, 0, w - 1);
+              const sy = clamp((y - ly * ((reach * s) / 3)) | 0, 0, h - 1);
+              const sh = thick[sy * w + sx]! / 255;
+              occ = Math.max(occ, sh - ht - s * 0.06);
+            }
+            const shade = 1 - clamp(occ, 0, 1) * 0.58;
+            r *= shade;
+            g *= shade;
+            b *= shade;
+            if (wv > 0.05) {
+              const spec = ndl * ndl * ndl * ndl * ndl * wv * (0.18 + ht * 0.35);
+              r += spec * (0.38 + pr * 0.62);
+              g += spec * (0.34 + pg * 0.62);
+              b += spec * (0.28 + pb * 0.55);
             }
           }
         }

@@ -6,6 +6,7 @@ import {
   ChevronsDown,
   ChevronsUp,
   Circle,
+  CloudRain,
   Compass,
   Copy,
   Download,
@@ -27,6 +28,7 @@ import {
   Save,
   Scissors,
   Share2,
+  Sparkles,
   Spline,
   Trash2,
   Undo2,
@@ -74,6 +76,8 @@ const TOOLS: ToolDef[] = [
   { id: "oil", label: "Oil", icon: Brush, hint: "Wet color with body" },
   { id: "glaze", label: "Glaze", icon: Droplets, hint: "Thin transparent veil" },
   { id: "impasto", label: "Impasto", icon: Layers, hint: "Heavy ridges" },
+  { id: "splat", label: "Splat", icon: Sparkles, hint: "Flicks and droplets" },
+  { id: "drip", label: "Drip", icon: CloudRain, hint: "Gravity runs" },
   { id: "dry", label: "Dry", icon: Wind, hint: "Broken scumble" },
   { id: "smudge", label: "Smudge", icon: Blend, hint: "Push and mix" },
   { id: "blend", label: "Blend", icon: Wand2, hint: "Wet mix into a new color" },
@@ -87,8 +91,8 @@ const TOOLS: ToolDef[] = [
   { id: "stencil", label: "Stencil", icon: BoxSelect, hint: "Draw a mask" },
 ];
 
-const DRAW_TOOLS: OilTool[] = ["oil", "glaze", "impasto", "dry", "smudge", "blend", "soften", "knife", "swirl", "scrape", "lift"];
-const FOCUS_TOOLS: OilTool[] = ["oil", "glaze", "impasto", "smudge", "blend", "knife", "lift", "sample"];
+const DRAW_TOOLS: OilTool[] = ["oil", "glaze", "impasto", "splat", "drip", "dry", "smudge", "blend", "soften", "knife", "swirl", "scrape", "lift"];
+const FOCUS_TOOLS: OilTool[] = ["oil", "glaze", "impasto", "splat", "drip", "smudge", "knife", "sample"];
 
 const MASK_MODES: { id: MaskMode; label: string }[] = [
   { id: "off", label: "Off" },
@@ -127,6 +131,8 @@ export function Studio() {
   const [body, setBody] = useState(boot.body);
   const [steady, setSteady] = useState(boot.steady);
   const [magic, setMagic] = useState(boot.magic);
+  const [lightU, setLightU] = useState(boot.lightU ?? 0.42);
+  const [lightV, setLightV] = useState(boot.lightV ?? -0.48);
   const [brush, setBrush] = useState<BrushShape>(boot.brush);
   const [maskMode, setMaskMode] = useState<MaskMode>(boot.maskMode);
   const [stencil, setStencil] = useState<StencilForm>(boot.stencil);
@@ -223,7 +229,7 @@ export function Studio() {
       return;
     }
     saveSettings({
-      version: 5,
+      version: 6,
       tool,
       pigmentId,
       color,
@@ -240,8 +246,10 @@ export function Studio() {
       stencil,
       ground: DEFAULT_SETTINGS.ground,
       presetId: DEFAULT_SETTINGS.presetId,
+      lightU,
+      lightV,
     });
-  }, [tool, pigmentId, color, size, flow, smear, wetness, drift, body, steady, magic, brush, maskMode, stencil]);
+  }, [tool, pigmentId, color, size, flow, smear, wetness, drift, body, steady, magic, brush, maskMode, stencil, lightU, lightV]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -269,6 +277,8 @@ export function Studio() {
     setBody(saved.body);
     setSteady(saved.steady);
     setMagic(saved.magic);
+    setLightU(saved.lightU ?? 0.42);
+    setLightV(saved.lightV ?? -0.48);
     setBrush(saved.brush);
     setMaskMode(saved.maskMode);
     setStencil(saved.stencil);
@@ -287,6 +297,7 @@ export function Studio() {
       maskMode: saved.maskMode,
       stencil: saved.stencil,
     });
+    engine.setLight(saved.lightU ?? 0.42, saved.lightV ?? -0.48);
 
     let stopped = false;
     const loop = (ts: number) => {
@@ -1400,6 +1411,17 @@ export function Studio() {
                 <span className="sr-only">Brush size</span>
                 <Slider min={SIZE_MIN} max={SIZE_MAX} step={1} value={[size]} onValueChange={(v) => v[0] != null && setSize(v[0])} />
               </label>
+              <LightOrb
+                u={lightU}
+                v={lightV}
+                onChange={(u, v) => {
+                  setLightU(u);
+                  setLightV(v);
+                  engineRef.current?.setLight(u, v);
+                  const ctx = ctxRef.current;
+                  if (engineRef.current && ctx) engineRef.current.present(ctx, false);
+                }}
+              />
               <button type="button" className="focus-btn focus-nav-label" aria-label="Hide tools" onClick={() => setHudOn(false)}>
                 <span>Hide</span>
                 <ChevronsUp className="size-4" />
@@ -1535,6 +1557,17 @@ export function Studio() {
                 <ToolMenu tool={tool} onTool={setTool} />
                 <HairMenu brush={brush} onBrush={setBrush} />
               </div>
+              <LightOrb
+                u={lightU}
+                v={lightV}
+                onChange={(u, v) => {
+                  setLightU(u);
+                  setLightV(v);
+                  engineRef.current?.setLight(u, v);
+                  const ctx = ctxRef.current;
+                  if (engineRef.current && ctx) engineRef.current.present(ctx, false);
+                }}
+              />
               <div className="tools-feel">
               <SliderField label="Size" value={size} min={SIZE_MIN} max={SIZE_MAX} step={1} onChange={setSize} />
               <SliderField label="Body" value={body} min={0} max={1} step={0.01} onChange={setBody} />
@@ -1761,6 +1794,39 @@ function IconTip({ label, children }: { label: string; children: ReactNode }) {
       <TooltipTrigger asChild>{children}</TooltipTrigger>
       <TooltipContent>{label}</TooltipContent>
     </Tooltip>
+  );
+}
+
+function LightOrb({ u, v, onChange }: { u: number; v: number; onChange: (u: number, v: number) => void }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const setFrom = (clientX: number, clientY: number) => {
+    const el = ref.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const x = ((clientX - r.left) / Math.max(1, r.width)) * 2 - 1;
+    const y = ((clientY - r.top) / Math.max(1, r.height)) * 2 - 1;
+    const d = Math.hypot(x, y);
+    const s = d > 1 ? 1 / d : 1;
+    onChange(x * s, y * s);
+  };
+  return (
+    <div
+      ref={ref}
+      className="light-orb"
+      role="slider"
+      aria-label="Light angle"
+      style={{ ["--hx" as string]: `${(u * 0.5 + 0.5) * 100}%`, ["--hy" as string]: `${(v * 0.5 + 0.5) * 100}%` }}
+      onPointerDown={(e) => {
+        if (e.button !== 0) return;
+        e.currentTarget.setPointerCapture(e.pointerId);
+        e.preventDefault();
+        setFrom(e.clientX, e.clientY);
+      }}
+      onPointerMove={(e) => {
+        if (!e.currentTarget.hasPointerCapture(e.pointerId)) return;
+        setFrom(e.clientX, e.clientY);
+      }}
+    />
   );
 }
 
