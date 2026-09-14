@@ -631,7 +631,7 @@ textarea,
   scroll-snap-type: x proximity;
   touch-action: pan-x;
   -webkit-overflow-scrolling: touch;
-  mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
+  mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 14px), transparent 100%);
 }
 
 .color-wheel-track {
@@ -976,14 +976,15 @@ body.is-color-drag .focus-swatch {
   overflow-y: hidden;
   touch-action: pan-x;
   -webkit-overflow-scrolling: touch;
-  mask-image: linear-gradient(90deg, transparent 0, #000 8px, #000 calc(100% - 8px), transparent 100%);
+  mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 12px), transparent 100%);
 }
 
 .palette-strip-colors .color-wheel-track {
   display: flex;
   width: max-content;
+  min-width: max-content;
   flex-wrap: nowrap;
-  padding: 4px 10px 6px;
+  padding: 4px 8px 6px 2px;
 }
 
 @media (max-width: 1023px) {
@@ -2713,9 +2714,9 @@ body.is-color-drag .canvas-col {
   .palette-strip-colors .color-wheel-track {
     display: flex;
     width: max-content;
-    min-width: 0;
+    min-width: max-content;
     flex-wrap: nowrap;
-    padding: 4px 10px 8px;
+    padding: 4px 10px 8px 2px;
   }
 
   .palette-list .tube-dot,
@@ -3156,7 +3157,7 @@ body.is-color-drag .canvas-col {
   flex-wrap: nowrap !important;
   width: max-content;
   min-width: max-content;
-  padding: 4px 10px 8px;
+  padding: 4px 10px 8px 2px;
   gap: 7px;
 }
 

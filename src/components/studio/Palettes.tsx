@@ -63,27 +63,27 @@ export function PaletteRail({
           <X className="size-4" />
         </button>
       </div>
-      <div className="mine-bar">
-        <p className="tape-counter min-w-0 flex-1">Mine</p>
-      </div>
-      <div className="color-wheel">
-        <div className="color-wheel-track">
-          {mine.map((c, i) => (
-            <Swatch
-              key={`${c}-${i}`}
-              hex={c}
-              label={`Mine ${i + 1}`}
-              on={c.toLowerCase() === hex}
-              className="tube-dot"
-              onPick={() => onPick(c, `mine:${c}`)}
-            />
-          ))}
-          <button type="button" className="tube-dot is-empty is-add" aria-label="Add color to mine" onClick={onAddMine}>
-            <Plus className="size-4" />
-          </button>
-        </div>
-      </div>
       <div className="palette-list">
+        <div className="palette-strip is-featured mine-strip">
+          <span className="palette-strip-name">Mine</span>
+          <div className="palette-strip-colors color-wheel">
+            <div className="color-wheel-track">
+              {mine.map((c, i) => (
+                <Swatch
+                  key={`${c}-${i}`}
+                  hex={c}
+                  label={`Mine ${i + 1}`}
+                  on={c.toLowerCase() === hex}
+                  className="palette-chip"
+                  onPick={() => onPick(c, `mine:${c}`)}
+                />
+              ))}
+              <button type="button" className="palette-chip is-empty is-add" aria-label="Add color to mine" onClick={onAddMine}>
+                <Plus className="size-4" />
+              </button>
+            </div>
+          </div>
+        </div>
         <PaletteStrip palette={JESTR_PALETTE} hex={hex} onPick={onPick} featured />
         {custom.map((p) => (
           <PaletteStrip
