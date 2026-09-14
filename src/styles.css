@@ -341,6 +341,7 @@ textarea,
 
   .palette-list {
     display: flex;
+    flex-direction: column;
     flex: 1 1 auto;
     min-height: 10rem;
     overflow-x: hidden;
@@ -779,20 +780,19 @@ body.is-color-drag .focus-swatch {
 
 .tube-rack.is-scroll {
   display: flex;
+  flex-direction: column;
   flex-wrap: nowrap;
-  gap: 6px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding: 2px 1px 6px;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
+  gap: 2px;
+  overflow: visible;
+  padding: 0;
+  min-width: 0;
 }
 
 .tube-rack.is-scroll .tube-dot {
-  width: 2.2rem;
-  height: 2.2rem;
+  width: 2.15rem;
+  height: 2.15rem;
   max-width: none;
-  flex: 0 0 auto;
+  flex: 0 0 2.15rem;
 }
 
 .mobile-tubes {
@@ -879,16 +879,17 @@ body.is-color-drag .focus-swatch {
 }
 
 .palette-save-row {
-  display: grid;
-  grid-template-columns: 1fr 1.2fr auto;
+  display: flex;
   align-items: center;
   gap: 6px;
+  flex-shrink: 0;
 }
 
 .palette-save-row .analog-btn.analog-chip {
-  width: 100%;
-  min-width: 0;
-  height: 44px;
+  width: auto;
+  min-width: 5.4rem;
+  height: 36px;
+  padding: 0 12px;
 }
 
 .palette-board {
@@ -942,18 +943,18 @@ body.is-color-drag .focus-swatch {
 .palette-strip {
   position: relative;
   display: grid;
-  grid-template-columns: 3.2rem minmax(0, 1fr) auto;
+  grid-template-columns: 4.4rem minmax(0, 1fr) auto;
   align-items: center;
-  gap: 6px;
-  min-height: 2.2rem;
+  gap: 8px;
+  min-height: 2.5rem;
   min-width: 0;
-  padding: 2px 0;
+  padding: 3px 0;
   overflow: hidden;
 }
 
 .palette-strip-name {
-  width: 3.2rem;
-  min-width: 3.2rem;
+  width: 4.4rem;
+  min-width: 4.4rem;
   overflow: hidden;
   font-size: 9px;
   font-weight: 700;
@@ -2777,12 +2778,14 @@ body.is-color-drag .canvas-col {
   }
 
   .palette-save-row .analog-btn.analog-chip {
+    width: auto;
     height: 36px;
   }
 
   .palette-list {
     flex: 1 1 auto;
     min-height: 12rem;
+    flex-direction: column;
   }
 
   .palette-list .tube-dot,
@@ -2790,8 +2793,22 @@ body.is-color-drag .canvas-col {
   .palette-board .tube-dot,
   .palette-board .palette-chip,
   .tube-rack.color-wheel .tube-dot {
-    width: 2.8rem;
-    height: 2.8rem;
+    width: 2.15rem;
+    height: 2.15rem;
+    min-width: 2.15rem;
+    flex: 0 0 2.15rem;
+  }
+
+  .palette-strip {
+    grid-template-columns: 4.6rem minmax(0, 1fr) auto;
+    min-height: 2.6rem;
+  }
+
+  .palette-strip-name {
+    width: 4.6rem;
+    min-width: 4.6rem;
+    font-size: 10px;
+    letter-spacing: 0.08em;
   }
 }
 
@@ -2811,12 +2828,18 @@ body.is-color-drag .canvas-col {
 @media (pointer: coarse) {
   .tools-rail .analog-btn,
   .palette-rail .analog-btn,
-  .palette-list .analog-btn,
+  .palette-list .analog-btn {
+    touch-action: manipulation;
+  }
+
   .palette-list .tube-dot,
   .palette-list .palette-chip,
   .palette-board .tube-dot,
-  .palette-board .palette-chip {
-    touch-action: pan-y;
+  .palette-board .palette-chip,
+  .tube-scroll,
+  .palette-strip-colors,
+  .color-wheel {
+    touch-action: pan-x;
   }
 }
 
@@ -3112,14 +3135,30 @@ body.is-color-drag .canvas-col {
   touch-action: pan-x;
 }
 
+.palette-list .tube-rack {
+  overflow: visible;
+  mask-image: none;
+}
+
 .palette-list .color-wheel-track,
-.palette-strip-colors .color-wheel-track {
-  display: flex;
-  flex-wrap: nowrap;
+.palette-strip-colors .color-wheel-track,
+.tube-scroll .color-wheel-track {
+  display: flex !important;
+  flex-direction: row;
+  flex-wrap: nowrap !important;
   width: max-content;
-  min-width: 0;
-  padding: 4px 10px 6px;
-  gap: 6px;
+  min-width: max-content;
+  padding: 4px 10px 8px;
+  gap: 7px;
+}
+
+.palette-chip,
+.tube-scroll .tube-dot,
+.palette-list .tube-dot {
+  flex: 0 0 2.05rem;
+  width: 2.05rem;
+  height: 2.05rem;
+  min-width: 2.05rem;
 }
 
 .symbol-slider {
