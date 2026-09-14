@@ -3236,6 +3236,33 @@ body.is-color-drag .canvas-col {
   background-size: 4px 4px;
 }
 
+.tool-menu-pop {
+  z-index: 90;
+  width: min(22.5rem, calc(100vw - 1.2rem));
+  max-height: min(70dvh, 28rem);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 8px;
+}
+
+.tool-menu-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.tool-menu-grid .analog-btn {
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  min-height: 40px;
+  justify-content: flex-start;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
 .light-orb {
   width: 42px;
   height: 42px;

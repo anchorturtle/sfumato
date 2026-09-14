@@ -1837,29 +1837,35 @@ function HairMark({ shape }: { shape: BrushShape }) {
 function ToolMenu({ tool, onTool }: { tool: OilTool; onTool: (t: OilTool) => void }) {
   const current = TOOLS.find((t) => t.id === tool) ?? TOOLS[0]!;
   const Icon = current.icon;
+  const [open, setOpen] = useState(false);
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button type="button" className="analog-btn analog-chip tools-menu-btn" aria-label={`Tool ${current.label}`}>
           <Icon className="size-4" />
           <span>{current.label}</span>
         </button>
       </PopoverTrigger>
-      <PopoverContent align="start" side="top" className="w-48 p-1">
-        {TOOLS.map((t) => {
-          const Item = t.icon;
-          return (
-            <button
-              key={t.id}
-              type="button"
-              className={cn("analog-btn analog-chip mt-0.5 w-full justify-start", tool === t.id && "is-on")}
-              onClick={() => onTool(t.id)}
-            >
-              <Item className="size-4" />
-              {t.label}
-            </button>
-          );
-        })}
+      <PopoverContent align="start" side="top" collisionPadding={16} className="tool-menu-pop p-1.5">
+        <div className="tool-menu-grid">
+          {TOOLS.map((t) => {
+            const Item = t.icon;
+            return (
+              <button
+                key={t.id}
+                type="button"
+                className={cn("analog-btn analog-chip justify-start", tool === t.id && "is-on")}
+                onClick={() => {
+                  onTool(t.id);
+                  setOpen(false);
+                }}
+              >
+                <Item className="size-4" />
+                {t.label}
+              </button>
+            );
+          })}
+        </div>
       </PopoverContent>
     </Popover>
   );
@@ -1867,26 +1873,32 @@ function ToolMenu({ tool, onTool }: { tool: OilTool; onTool: (t: OilTool) => voi
 
 function HairMenu({ brush, onBrush }: { brush: BrushShape; onBrush: (b: BrushShape) => void }) {
   const current = BRUSHES.find((b) => b.id === brush) ?? BRUSHES[0]!;
+  const [open, setOpen] = useState(false);
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button type="button" className="analog-btn analog-chip tools-menu-btn" aria-label={`Hair ${current.label}`}>
           <HairMark shape={current.id} />
           <span>{current.label}</span>
         </button>
       </PopoverTrigger>
-      <PopoverContent align="start" side="top" className="w-44 p-1">
-        {BRUSHES.map((b) => (
-          <button
-            key={b.id}
-            type="button"
-            className={cn("analog-btn analog-chip mt-0.5 w-full justify-start", brush === b.id && "is-on")}
-            onClick={() => onBrush(b.id)}
-          >
-            <HairMark shape={b.id} />
-            {b.label}
-          </button>
-        ))}
+      <PopoverContent align="start" side="top" collisionPadding={16} className="tool-menu-pop p-1.5">
+        <div className="tool-menu-grid">
+          {BRUSHES.map((b) => (
+            <button
+              key={b.id}
+              type="button"
+              className={cn("analog-btn analog-chip justify-start", brush === b.id && "is-on")}
+              onClick={() => {
+                onBrush(b.id);
+                setOpen(false);
+              }}
+            >
+              <HairMark shape={b.id} />
+              {b.label}
+            </button>
+          ))}
+        </div>
       </PopoverContent>
     </Popover>
   );
