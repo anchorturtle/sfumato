@@ -1618,7 +1618,7 @@ export function Studio() {
           </div>
         </aside>
 
-        <nav className="dock-tabs mobile-dock px-2 pb-[max(0.45rem,env(safe-area-inset-bottom))] pt-1">
+        <nav className="dock-tabs mobile-dock touch-only px-2 pb-[max(0.45rem,env(safe-area-inset-bottom))] pt-1">
           <DeckTabs value={deckTab} onChange={setDeckTab} />
         </nav>
       </div>

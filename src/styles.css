@@ -244,19 +244,21 @@ textarea,
   pointer-events: auto;
 }
 
-.mix-rail,
-.tools-rail,
-.palette-rail {
-  position: absolute;
-  left: 0.4rem;
-  right: 0.4rem;
-  bottom: calc(4.4rem + env(safe-area-inset-bottom, 0px));
-  z-index: 20;
-  height: min(56dvh, 30rem);
-  max-height: calc(100dvh - 8rem);
-  padding: 0;
-  animation: sheet-up 180ms var(--ease-out);
-  pointer-events: auto;
+@media (max-width: 1023px) {
+  .mix-rail,
+  .tools-rail,
+  .palette-rail {
+    position: absolute;
+    left: 0.4rem;
+    right: 0.4rem;
+    bottom: calc(4.4rem + env(safe-area-inset-bottom, 0px));
+    z-index: 20;
+    height: min(56dvh, 30rem);
+    max-height: calc(100dvh - 8rem);
+    padding: 0;
+    animation: sheet-up 180ms var(--ease-out);
+    pointer-events: auto;
+  }
 }
 
 .mix-rail .orbit-win,
@@ -383,32 +385,71 @@ textarea,
     display: none !important;
   }
 
+  .desk-hide {
+    display: flex !important;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .sheet-scrim,
+  .sheet-close {
+    display: none !important;
+  }
+
   .studio-body {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: 11.5rem minmax(0, 1fr) 13rem;
     grid-template-rows: minmax(0, 1fr) auto;
     grid-template-areas:
-      "canvas"
-      "tabs";
-    gap: 0.35rem;
-    padding: 0 0.4rem max(0.35rem, env(safe-area-inset-bottom));
+      "mix canvas palettes"
+      "mix tools palettes";
+    gap: 0.3rem;
+    padding: 0 0.3rem max(0.3rem, env(safe-area-inset-bottom));
   }
 
   .mix-rail,
   .tools-rail,
   .palette-rail {
-    left: 12%;
-    right: 12%;
-    height: min(54dvh, 34rem);
-    max-height: calc(100dvh - 8.5rem);
+    position: relative;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    height: auto;
+    max-height: none;
+    padding: 0;
+    animation: none;
+    z-index: auto;
+  }
+
+  .mix-rail .orbit-win,
+  .palette-rail .orbit-win {
+    border-radius: 16px;
+  }
+
+  .tools-rail {
+    max-height: 6.75rem;
+  }
+
+  .tools-rail .orbit-win {
+    border-radius: 14px;
+  }
+
+  .tools-rail .win-body {
+    overflow: hidden;
+  }
+
+  .tool-grid {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: 4px;
+  }
+
+  .tool-grid .analog-btn {
+    height: 40px;
   }
 }
 
 @media (min-width: 1280px) {
-  .mix-rail,
-  .tools-rail,
-  .palette-rail {
-    left: 18%;
-    right: 18%;
+  .studio-body {
+    grid-template-columns: 12.5rem minmax(0, 1fr) 14.5rem;
   }
 }
 
