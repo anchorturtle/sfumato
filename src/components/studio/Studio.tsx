@@ -1532,68 +1532,53 @@ export function Studio() {
           <div className="orbit-win h-full">
             <WinBar title="Tools" meta={colorHex} onClose={closeDeck} />
             <div className="win-body p-2">
-            <div className="tools-extras">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button type="button" className="analog-btn analog-chip">
-                    Hair
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent align="end" side="top" className="w-80">
-                  <HairPanel brush={brush} onBrush={setBrush} />
-                </PopoverContent>
-              </Popover>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button type="button" className={cn("analog-btn analog-chip", (tool === "stencil" || (hasMask && maskMode !== "off")) && "is-on")}>
-                    Stencil
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent align="end" side="top" className="w-72">
-                  <StencilPanel
-                    tool={tool}
-                    onTool={setTool}
-                    maskMode={maskMode}
-                    onMaskMode={setMaskMode}
-                    stencil={stencil}
-                    onStencil={setStencil}
-                    hasMask={hasMask}
-                    onFill={() => {
-                      engineRef.current?.fillMask();
-                      kickLoop();
-                      syncFromEngine();
-                    }}
-                    onClear={() => {
-                      engineRef.current?.clearMask();
-                      kickLoop();
-                      syncFromEngine();
-                    }}
-                    onInvert={() => {
-                      engineRef.current?.invertMask();
-                      kickLoop();
-                      syncFromEngine();
-                    }}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            <ToolGrid tool={tool} onTool={setTool} />
-            <div className="mt-2 grid grid-cols-2 gap-x-3">
+            <div className="tools-strip">
+              <OptionSlider
+                label="Tool"
+                value={tool}
+                options={TOOLS.map((t) => ({ id: t.id, label: t.label }))}
+                onChange={(id) => setTool(id as OilTool)}
+              />
+              <OptionSlider
+                label="Hair"
+                value={brush}
+                options={BRUSHES.map((b) => ({ id: b.id, label: b.label }))}
+                onChange={(id) => setBrush(id as BrushShape)}
+              />
               <SliderField label="Size" value={size} min={SIZE_MIN} max={SIZE_MAX} step={1} onChange={setSize} />
               <SliderField label="Body" value={body} min={0} max={1} step={0.01} onChange={setBody} />
+              <SliderField label="Mix" value={smear} min={0} max={1} step={0.01} onChange={setSmear} />
+              <SliderField label="Flow" value={flow} min={0.12} max={1} step={0.01} onChange={setFlow} />
+              <SliderField label="Wet" value={wetness} min={0} max={1} step={0.01} onChange={setWetness} />
+              <SliderField label="Steady" value={steady} min={0} max={1} step={0.01} onChange={setSteady} />
+              <SliderField label="Drift" value={drift} min={0} max={1} step={0.01} onChange={setDrift} />
             </div>
-            <MixPanel
-              flow={flow}
-              smear={smear}
-              wetness={wetness}
-              drift={drift}
-              steady={steady}
-              onFlow={setFlow}
-              onSmear={setSmear}
-              onWetness={setWetness}
-              onDrift={setDrift}
-              onSteady={setSteady}
-            />
+            {(tool === "stencil" || (hasMask && maskMode !== "off")) && (
+              <StencilPanel
+                tool={tool}
+                onTool={setTool}
+                maskMode={maskMode}
+                onMaskMode={setMaskMode}
+                stencil={stencil}
+                onStencil={setStencil}
+                hasMask={hasMask}
+                onFill={() => {
+                  engineRef.current?.fillMask();
+                  kickLoop();
+                  syncFromEngine();
+                }}
+                onClear={() => {
+                  engineRef.current?.clearMask();
+                  kickLoop();
+                  syncFromEngine();
+                }}
+                onInvert={() => {
+                  engineRef.current?.invertMask();
+                  kickLoop();
+                  syncFromEngine();
+                }}
+              />
+            )}
             </div>
           </div>
         </div>
@@ -1787,52 +1772,36 @@ function IconTip({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-function ToolGrid({
-  tool,
-  onTool,
+function OptionSlider({
+  label,
+  value,
+  options,
+  onChange,
 }: {
-  tool: OilTool;
-  onTool: (t: OilTool) => void;
+  label: string;
+  value: string;
+  options: { id: string; label: string }[];
+  onChange: (id: string) => void;
 }) {
+  const i = Math.max(0, options.findIndex((o) => o.id === value));
+  const current = options[i];
   return (
-    <div className="tool-grid">
-      {TOOLS.map((t) => {
-        const Icon = t.icon;
-        const active = tool === t.id;
-        return (
-          <IconTip key={t.id} label={t.hint}>
-            <button
-              type="button"
-              className={cn("analog-btn analog-round", active && "is-on")}
-              aria-label={t.label}
-              aria-pressed={active}
-              onClick={() => onTool(t.id)}
-            >
-              <Icon className="size-5" />
-            </button>
-          </IconTip>
-        );
-      })}
-    </div>
-  );
-}
-
-function HairPanel({ brush, onBrush }: { brush: BrushShape; onBrush: (b: BrushShape) => void }) {
-  return (
-    <div className="flex flex-wrap gap-1">
-      {BRUSHES.map((b) => (
-        <IconTip key={b.id} label={b.hint}>
-          <button
-            type="button"
-            className={cn("analog-btn analog-chip", brush === b.id && "is-on")}
-            aria-pressed={brush === b.id}
-            onClick={() => onBrush(b.id)}
-          >
-            {b.label}
-          </button>
-        </IconTip>
-      ))}
-    </div>
+    <label className="option-slider">
+      <span className="mb-0.5 flex items-center justify-between">
+        <span className="tape-counter">{label}</span>
+        <span className="tape-counter opacity-90">{current?.label ?? value}</span>
+      </span>
+      <Slider
+        min={0}
+        max={Math.max(0, options.length - 1)}
+        step={1}
+        value={[i]}
+        onValueChange={(v) => {
+          const next = options[v[0] ?? 0];
+          if (next) onChange(next.id);
+        }}
+      />
+    </label>
   );
 }
 
@@ -1860,8 +1829,7 @@ function StencilPanel({
   onInvert: () => void;
 }) {
   return (
-    <div className="flex flex-col gap-3">
-      <p className="text-xs leading-5 text-muted">Draw a mask. Shift erases. Off drops the overlay now. In/Out clip paint.</p>
+    <div className="tools-mask">
       <div className="grid grid-cols-4 gap-1">
         {STENCIL_FORMS.map((s) => {
           const Icon = s.icon;
@@ -1917,40 +1885,6 @@ function StencilPanel({
           Clear
         </button>
       </div>
-    </div>
-  );
-}
-
-function MixPanel({
-  flow,
-  smear,
-  wetness,
-  drift,
-  steady,
-  onFlow,
-  onSmear,
-  onWetness,
-  onDrift,
-  onSteady,
-}: {
-  flow: number;
-  smear: number;
-  wetness: number;
-  drift: number;
-  steady: number;
-  onFlow: (n: number) => void;
-  onSmear: (n: number) => void;
-  onWetness: (n: number) => void;
-  onDrift: (n: number) => void;
-  onSteady: (n: number) => void;
-}) {
-  return (
-    <div className="mix-feel mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5">
-      <SliderField label="Mix" value={smear} min={0} max={1} step={0.01} onChange={onSmear} />
-      <SliderField label="Flow" value={flow} min={0.12} max={1} step={0.01} onChange={onFlow} />
-      <SliderField label="Wet" value={wetness} min={0} max={1} step={0.01} onChange={onWetness} />
-      <SliderField label="Steady" value={steady} min={0} max={1} step={0.01} onChange={onSteady} />
-      <SliderField label="Drift" value={drift} min={0} max={1} step={0.01} onChange={onDrift} />
     </div>
   );
 }
