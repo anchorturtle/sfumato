@@ -6,6 +6,7 @@ import {
   ChevronsDown,
   ChevronsUp,
   Circle,
+  Compass,
   Copy,
   Download,
   Droplets,
@@ -15,7 +16,6 @@ import {
   FlipHorizontal2,
   GripVertical,
   Home,
-  Images,
   Layers,
   Maximize2,
   Minus,
@@ -1168,18 +1168,12 @@ export function Studio() {
             <button
               type="button"
               className={cn("analog-btn analog-round", travellersOpen && "is-on")}
-              aria-label="Travellers gallery"
+              aria-label="Travellers"
               aria-pressed={travellersOpen}
               onClick={() => setTravellersOpen(true)}
             >
-              <Images className="size-5" />
+              <Compass className="size-5" />
             </button>
-          </nav>
-          <nav className="site-nav studio-enter" aria-label="Orbit pages">
-            <a className="site-link" href="https://www.anchorturtle.com/#gallery">
-              <Images className="size-3.5" />
-              Gallery
-            </a>
           </nav>
           <OrbitDeck />
           <div className="dock-end">
@@ -1265,7 +1259,7 @@ export function Studio() {
             </PopoverTrigger>
             <PopoverContent align="end" className="w-48 p-2">
               <button type="button" className="analog-btn analog-chip w-full justify-start" onClick={() => setTravellersOpen(true)}>
-                <Images className="size-4" />
+                <Compass className="size-4" />
                 Travellers
               </button>
               <button type="button" className="analog-btn analog-chip mt-1 w-full justify-start" disabled={!canUndo} onClick={undoNow}>
@@ -1421,8 +1415,8 @@ export function Studio() {
         )}
 
         <div className="studio-body">
-          {deckTab && deckTab !== "mix" && (
-            <button type="button" className="sheet-scrim touch-only" aria-label="Hide panel" onClick={closeDeck} />
+          {deckTab && (
+            <button type="button" className="sheet-scrim" aria-label="Hide panel" onClick={closeDeck} />
           )}
           <aside className={cn("mix-rail", deckTab !== "mix" && "desk-hide")}>
             <div className="orbit-win h-full">
@@ -1624,7 +1618,7 @@ export function Studio() {
           </div>
         </aside>
 
-        <nav className="dock-tabs mobile-dock touch-only px-2 pb-[max(0.45rem,env(safe-area-inset-bottom))] pt-1">
+        <nav className="dock-tabs mobile-dock px-2 pb-[max(0.45rem,env(safe-area-inset-bottom))] pt-1">
           <DeckTabs value={deckTab} onChange={setDeckTab} />
         </nav>
       </div>
