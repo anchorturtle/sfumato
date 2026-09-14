@@ -710,6 +710,28 @@ export class OilEngine {
     this.blit(ctx);
   }
 
+  async exportPng(longEdge = 3200): Promise<Blob> {
+    this.dirty.all = true;
+    this.composite(false);
+    const native = document.createElement("canvas");
+    native.width = this.width;
+    native.height = this.height;
+    native.getContext("2d")!.putImageData(this.display, 0, 0);
+    const scale = Math.max(1, longEdge / Math.max(this.width, this.height));
+    const w = Math.round(this.width * scale);
+    const h = Math.round(this.height * scale);
+    const out = document.createElement("canvas");
+    out.width = w;
+    out.height = h;
+    const ctx = out.getContext("2d", { alpha: false })!;
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(native, 0, 0, w, h);
+    const blob = await new Promise<Blob | null>((resolve) => out.toBlob(resolve, "image/png"));
+    if (!blob) throw new Error("png");
+    return blob;
+  }
+
   sampleAt(x: number, y: number): [number, number, number] | null {
     const w = this.width;
     const h = this.height;

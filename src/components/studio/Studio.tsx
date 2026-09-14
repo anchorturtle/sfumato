@@ -499,47 +499,40 @@ export function Studio() {
 
   const saveNow = useCallback(async () => {
     const e = engineRef.current;
-    const canvas = canvasRef.current;
-    const ctx = ctxRef.current;
     if (!e) return;
     try {
       await savePainting(e.toSnapshot());
       await saveHistory(e.exportHistory());
-      if (canvas && ctx) {
-        e.present(ctx);
-        const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
-        if (blob) {
-          await putSave(blob, "Sfumato");
-          setSavesEpoch((n) => n + 1);
-          const name = `sfumato-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.png`;
-          const file = new File([blob], name, { type: "image/png" });
-          const ios =
-            /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-            (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-          if (ios && typeof navigator.share === "function" && navigator.canShare?.({ files: [file] })) {
-            try {
-              await navigator.share({ files: [file], title: "Sfumato" });
-              flash("Saved · Photos");
-              return;
-            } catch (err) {
-              if ((err as Error).name === "AbortError") {
-                flash("Saved to gallery");
-                return;
-              }
-            }
+      const blob = await e.exportPng(3200);
+      await putSave(blob, "Sfumato");
+      setSavesEpoch((n) => n + 1);
+      const name = `sfumato-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.png`;
+      const file = new File([blob], name, { type: "image/png" });
+      const ios =
+        /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+      if (ios && typeof navigator.share === "function" && navigator.canShare?.({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], title: "Sfumato" });
+          flash("Saved · high-res PNG");
+          return;
+        } catch (err) {
+          if ((err as Error).name === "AbortError") {
+            flash("Saved to gallery");
+            return;
           }
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = name;
-          a.rel = "noopener";
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          window.setTimeout(() => URL.revokeObjectURL(url), 2500);
         }
       }
-      flash("Saved to gallery");
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = name;
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 2500);
+      flash("Saved · high-res PNG");
     } catch {
       flash("Could not save");
     }
@@ -918,12 +911,13 @@ export function Studio() {
   };
 
   const paintingBlob = async () => {
-    const canvas = canvasRef.current;
     const engine = engineRef.current;
-    const ctx = ctxRef.current;
-    if (!canvas || !engine || !ctx) return null;
-    engine.present(ctx);
-    return new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
+    if (!engine) return null;
+    try {
+      return await engine.exportPng(3200);
+    } catch {
+      return null;
+    }
   };
 
   const copyPhoto = async () => {
