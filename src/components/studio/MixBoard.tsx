@@ -12,14 +12,15 @@ const MIX_BASE = 480;
 function mixPixels(el: HTMLElement) {
   const r = el.getBoundingClientRect();
   if (r.width < 24 || r.height < 24) return null;
-  const dpr = Math.min(2, window.devicePixelRatio || 1);
-  let w = Math.max(280, Math.round(r.width * dpr));
-  let h = Math.max(200, Math.round(r.height * dpr));
-  const cap = 960;
+  const coarse = window.matchMedia("(pointer: coarse)").matches;
+  const dpr = coarse ? 1 : Math.min(1.25, window.devicePixelRatio || 1);
+  let w = Math.max(200, Math.round(r.width * dpr));
+  let h = Math.max(140, Math.round(r.height * dpr));
+  const cap = coarse ? 560 : 720;
   if (w > cap || h > cap) {
     const s = cap / Math.max(w, h);
-    w = Math.max(280, Math.round(w * s));
-    h = Math.max(200, Math.round(h * s));
+    w = Math.max(200, Math.round(w * s));
+    h = Math.max(140, Math.round(h * s));
   }
   w -= w % 2;
   h -= h % 2;
@@ -138,7 +139,7 @@ export function MixBoard({ color, sampling = false, onUse, onKeep }: Props) {
     const stage = canvas.parentElement ?? canvas;
     const first = mixPixels(stage) ?? { w: 640, h: 400 };
     const engine = new OilEngine(first.w, first.h, "glass", 48);
-    engine.reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    engine.reducedMotion = true;
     engineRef.current = engine;
     canvas.width = first.w;
     canvas.height = first.h;
@@ -156,13 +157,14 @@ export function MixBoard({ color, sampling = false, onUse, onKeep }: Props) {
       const last = lastTsRef.current || ts;
       lastTsRef.current = ts;
       const dt = Math.min(0.1, (ts - last) / 1000);
+      const stroking = engine.isStroking;
       const keep = engine.tick(dt, ts);
-      engine.drawTo(ctx);
-      if (keep || engine.isStroking) {
+      engine.present(ctx, stroking);
+      if (keep || stroking) {
         rafRef.current = requestAnimationFrame(loop);
       } else {
         rafRef.current = 0;
-        engine.drawTo(ctx);
+        engine.present(ctx, false);
       }
     };
 

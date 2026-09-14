@@ -51,7 +51,7 @@ export function PaletteRail({
           onClick={() => onSavePalette?.(mine.length ? mine : [hex])}
         >
           <Save className="size-4" />
-          Save set
+          Save
         </button>
         <button
           type="button"

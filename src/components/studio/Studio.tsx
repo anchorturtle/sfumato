@@ -1533,18 +1533,19 @@ export function Studio() {
             <WinBar title="Tools" meta={colorHex} onClose={closeDeck} />
             <div className="win-body p-2">
             <div className="tools-strip">
-              <OptionSlider
+              <SymbolSlider
                 label="Tool"
                 value={tool}
-                options={TOOLS.map((t) => ({ id: t.id, label: t.label }))}
+                options={TOOLS.map((t) => ({ id: t.id, label: t.label, icon: t.icon }))}
                 onChange={(id) => setTool(id as OilTool)}
               />
-              <OptionSlider
+              <SymbolSlider
                 label="Hair"
                 value={brush}
-                options={BRUSHES.map((b) => ({ id: b.id, label: b.label }))}
+                options={BRUSHES.map((b) => ({ id: b.id, label: b.label, mark: b.id }))}
                 onChange={(id) => setBrush(id as BrushShape)}
               />
+              <div className="tools-feel">
               <SliderField label="Size" value={size} min={SIZE_MIN} max={SIZE_MAX} step={1} onChange={setSize} />
               <SliderField label="Body" value={body} min={0} max={1} step={0.01} onChange={setBody} />
               <SliderField label="Mix" value={smear} min={0} max={1} step={0.01} onChange={setSmear} />
@@ -1552,6 +1553,7 @@ export function Studio() {
               <SliderField label="Wet" value={wetness} min={0} max={1} step={0.01} onChange={setWetness} />
               <SliderField label="Steady" value={steady} min={0} max={1} step={0.01} onChange={setSteady} />
               <SliderField label="Drift" value={drift} min={0} max={1} step={0.01} onChange={setDrift} />
+              </div>
             </div>
             {(tool === "stencil" || (hasMask && maskMode !== "off")) && (
               <StencilPanel
@@ -1732,16 +1734,16 @@ function Starfield() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     const paint = () => {
-      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      const dpr = 1;
       const w = window.innerWidth;
       const h = window.innerHeight;
       canvas.width = Math.floor(w * dpr);
       canvas.height = Math.floor(h * dpr);
       canvas.style.width = `${w}px`;
       canvas.style.height = `${h}px`;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, w, h);
-      for (let i = 0; i < 140; i++) {
+      for (let i = 0; i < 70; i++) {
         const x = (i * 97) % w;
         const y = (i * 53 + i * i * 13) % h;
         const r = 0.4 + (i % 5) * 0.22;
@@ -1769,6 +1771,60 @@ function IconTip({ label, children }: { label: string; children: ReactNode }) {
       <TooltipTrigger asChild>{children}</TooltipTrigger>
       <TooltipContent>{label}</TooltipContent>
     </Tooltip>
+  );
+}
+
+function HairMark({ shape }: { shape: BrushShape }) {
+  return <span className={cn("hair-mark", `hair-${shape}`)} aria-hidden />;
+}
+
+function SymbolSlider({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: { id: string; label: string; icon?: (typeof TOOLS)[number]["icon"]; mark?: BrushShape }[];
+  onChange: (id: string) => void;
+}) {
+  const i = Math.max(0, options.findIndex((o) => o.id === value));
+  const current = options[i];
+  return (
+    <div className="symbol-slider">
+      <span className="symbol-slider-head">
+        <span className="tape-counter">{label}</span>
+        <span className="symbol-slider-name">{current?.label ?? value}</span>
+      </span>
+      <div className="symbol-slider-row">
+        {options.map((o) => {
+          const Icon = o.icon;
+          return (
+            <button
+              key={o.id}
+              type="button"
+              className={cn("symbol-hit analog-btn analog-round", o.id === value && "is-on")}
+              aria-label={o.label}
+              aria-pressed={o.id === value}
+              onClick={() => onChange(o.id)}
+            >
+              {Icon ? <Icon className="size-4" /> : o.mark ? <HairMark shape={o.mark} /> : o.label.slice(0, 1)}
+            </button>
+          );
+        })}
+      </div>
+      <Slider
+        min={0}
+        max={Math.max(0, options.length - 1)}
+        step={1}
+        value={[i]}
+        onValueChange={(v) => {
+          const next = options[v[0] ?? 0];
+          if (next) onChange(next.id);
+        }}
+      />
+    </div>
   );
 }
 

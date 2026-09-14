@@ -213,15 +213,25 @@ textarea,
   display: none !important;
 }
 
+.mix-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
 .mix-tool {
-  min-width: 48px;
-  min-height: 52px;
+  min-width: 0;
+  min-height: 40px;
+  height: 40px;
   padding: 0;
+  overflow: visible;
 }
 
 .mix-tool svg {
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 1.45rem;
+  height: 1.45rem;
+  flex-shrink: 0;
 }
 
 .mix-foot-btn.analog-mini {
@@ -426,7 +436,7 @@ textarea,
   }
 
   .tools-rail {
-    max-height: 10.5rem;
+    max-height: 13.5rem;
   }
 
   .tools-rail .orbit-win {
@@ -444,7 +454,15 @@ textarea,
   }
 
   .tools-strip {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .tools-feel {
+    display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 6px 10px;
   }
 }
 
@@ -1978,6 +1996,15 @@ body.is-color-drag .canvas-col {
   display: none;
 }
 
+@media (min-width: 1024px), (min-width: 768px) and (orientation: landscape) {
+  .dock-actions {
+    display: flex;
+  }
+  .dock-more {
+    display: none;
+  }
+}
+
 .dock-more {
   display: grid;
 }
@@ -2598,7 +2625,19 @@ body.is-color-drag .canvas-col {
   }
 
   .mix-toolbar {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    gap: 4px;
+  }
+
+  .mix-tool {
+    min-width: 0;
+    min-height: 36px;
+    height: 36px;
+  }
+
+  .mix-tool svg {
+    width: 1.25rem;
+    height: 1.25rem;
   }
 
   .tube-rack.is-compact {
@@ -2799,13 +2838,24 @@ body.is-color-drag .canvas-col {
     border-radius: 16px;
   }
 
-  .dock-nav,
   .site-nav,
-  .dock-actions,
   .dock-divider,
   .dock-logo-sub,
   .enlarge-label {
     display: none !important;
+  }
+
+  .dock-nav,
+  .dock-actions {
+    display: flex !important;
+  }
+
+  .dock-actions .analog-btn,
+  .dock-nav .analog-btn {
+    min-width: 32px;
+    min-height: 32px;
+    width: 32px;
+    height: 32px;
   }
 
   .dock-logo-main {
@@ -2813,9 +2863,7 @@ body.is-color-drag .canvas-col {
   }
 
   .dock-more {
-    display: grid !important;
-    min-width: 34px;
-    min-height: 34px;
+    display: none !important;
   }
 
   .enlarge-chip {
@@ -2932,4 +2980,94 @@ body.is-color-drag .canvas-col {
   min-width: 36px;
   min-height: 36px;
   height: 36px;
+}
+
+.tools-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tools-feel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 12px;
+}
+
+.option-slider [data-slot="slider"] {
+  height: 28px;
+}
+
+.symbol-slider {
+  min-width: 0;
+}
+
+.symbol-slider-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.symbol-slider-name {
+  color: var(--baby-blue);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.symbol-slider-row {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.symbol-slider-row::-webkit-scrollbar {
+  display: none;
+}
+
+.symbol-hit {
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  padding: 0;
+}
+
+.symbol-slider [data-slot="slider"] {
+  height: 22px;
+}
+
+.hair-mark {
+  display: block;
+  background: currentColor;
+}
+
+.hair-round { width: 12px; height: 12px; border-radius: 999px; }
+.hair-filbert { width: 14px; height: 10px; border-radius: 8px; }
+.hair-flat { width: 16px; height: 6px; border-radius: 1px; }
+.hair-bright { width: 12px; height: 8px; border-radius: 1px; }
+.hair-fan {
+  width: 14px;
+  height: 12px;
+  background: repeating-linear-gradient(90deg, currentColor 0 2px, transparent 2px 4px);
+  border-radius: 0 0 6px 6px;
+}
+.hair-rigger { width: 3px; height: 14px; border-radius: 2px; }
+.hair-bristle {
+  width: 14px;
+  height: 12px;
+  background: repeating-linear-gradient(90deg, currentColor 0 1.5px, transparent 1.5px 3px);
+}
+.hair-mop { width: 14px; height: 14px; border-radius: 999px; opacity: 0.7; }
+.hair-stipple {
+  width: 14px;
+  height: 14px;
+  background: radial-gradient(circle, currentColor 1.2px, transparent 1.4px);
+  background-size: 4px 4px;
 }

@@ -684,7 +684,7 @@ export class OilEngine {
     if (this.stroking) return true;
     if (!this.params.magic || !this.hasWet || this.reducedMotion) return false;
     this.dryAcc += dt;
-    if (this.dryAcc < 0.045) return true;
+    if (this.dryAcc < 0.07) return true;
     this.diffuse(this.dryAcc);
     this.dryAcc = 0;
     return this.hasWet;
@@ -836,7 +836,7 @@ export class OilEngine {
     const tool = this.params.tool;
     const spacing = Math.max(
       0.8,
-      radius * (tool === "stencil" ? 0.18 : tool === "knife" || tool === "scrape" ? 0.2 : 0.32),
+      radius * (tool === "stencil" ? 0.18 : tool === "knife" || tool === "scrape" ? 0.2 : this.stroking ? 0.42 : 0.32),
     );
     const path = Math.hypot(nx - this.lastX, ny - this.lastY);
     const steps = Math.max(1, Math.ceil(path / spacing));
@@ -1306,7 +1306,7 @@ export class OilEngine {
         rgba[i + 3] = Math.round(outA * 255);
 
         if (thickAmt > 0) {
-          const groove = hairGroove(v, ry, shape);
+          const groove = this.stroking ? 1 : hairGroove(v, ry, shape);
           const bead = 0.7 + 0.4 * Math.min(1, Math.abs(v) / Math.max(ry, 0.001));
           const tAdd = thickAmt * k * groove * bead * 255;
           const remain = 1 - destT * 0.38;
