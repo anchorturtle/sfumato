@@ -348,6 +348,7 @@ export class OilEngine {
       this.advanceStroke(true);
     }
     this.stroking = false;
+    this.markAllDirty();
     if (this.strokeStart) {
       this.undo.push(this.strokeStart);
       if (this.undo.length > this.undoLimit) this.undo.shift();
@@ -711,11 +712,6 @@ export class OilEngine {
   private blitRect = { x: 0, y: 0, w: 0, h: 0, all: true };
 
   private blit(ctx: CanvasRenderingContext2D) {
-    const b = this.blitRect;
-    if (this.stroking && !b.all && b.w > 0 && b.h > 0) {
-      ctx.putImageData(this.display, 0, 0, b.x, b.y, b.w, b.h);
-      return;
-    }
     ctx.putImageData(this.display, 0, 0);
   }
 

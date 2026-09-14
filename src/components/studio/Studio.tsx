@@ -307,7 +307,7 @@ export function Studio() {
       const dt = Math.min(0.1, (ts - last) / 1000);
       const stroking = engine.isStroking;
       const keep = engine.tick(dt, ts);
-      engine.present(ctx, stroking);
+      engine.present(ctx, false);
       if (keep || stroking) {
         rafRef.current = requestAnimationFrame(loop);
       } else {

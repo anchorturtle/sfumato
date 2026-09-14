@@ -13,10 +13,10 @@ function mixPixels(el: HTMLElement) {
   const r = el.getBoundingClientRect();
   if (r.width < 24 || r.height < 24) return null;
   const coarse = window.matchMedia("(pointer: coarse)").matches;
-  const dpr = coarse ? 1 : Math.min(1.25, window.devicePixelRatio || 1);
-  let w = Math.max(200, Math.round(r.width * dpr));
-  let h = Math.max(140, Math.round(r.height * dpr));
-  const cap = coarse ? 560 : 720;
+  const dpr = Math.min(coarse ? 1.25 : 1.5, window.devicePixelRatio || 1);
+  let w = Math.max(240, Math.round(r.width * dpr));
+  let h = Math.max(180, Math.round(r.height * dpr));
+  const cap = coarse ? 800 : 960;
   if (w > cap || h > cap) {
     const s = cap / Math.max(w, h);
     w = Math.max(200, Math.round(w * s));
@@ -159,7 +159,7 @@ export function MixBoard({ color, sampling = false, onUse, onKeep }: Props) {
       const dt = Math.min(0.1, (ts - last) / 1000);
       const stroking = engine.isStroking;
       const keep = engine.tick(dt, ts);
-      engine.present(ctx, stroking);
+      engine.present(ctx, false);
       if (keep || stroking) {
         rafRef.current = requestAnimationFrame(loop);
       } else {
