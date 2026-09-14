@@ -492,7 +492,20 @@ export function MixBoard({ color, sampling = false, onUse, onKeep }: Props) {
         )}
       </div>
 
-      <TubeRack hex={hex} onPick={(h) => onUse(hexToRgb(h))} compact scroll />
+      <TubeRack
+        hex={hex}
+        onPick={(h) => {
+          const rgb = hexToRgb(h);
+          onUse(rgb);
+          const engine = engineRef.current;
+          if (!engine) return;
+          const next = mode === "pick" ? "drop" : mode;
+          if (next !== mode) setMode(next);
+          applyMode(engine, next, rgb, size);
+        }}
+        compact
+        scroll
+      />
 
       <div className="mix-foot flex shrink-0 items-center gap-2">
         <label className="min-w-0 flex-1">

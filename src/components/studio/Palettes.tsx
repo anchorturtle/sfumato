@@ -211,12 +211,10 @@ function Swatch({
       style={{ ["--pigment" as string]: hex }}
       onPointerDown={(e) => {
         if (e.button !== 0) return;
-        if (window.matchMedia("(max-width: 767px)").matches) return;
-        startColorDrag(hex, e.pointerId, e.clientX, e.clientY, onPick);
+        onPick();
+        startColorDrag(hex, e.pointerId, e.clientX, e.clientY);
       }}
-      onClick={() => {
-        if (window.matchMedia("(max-width: 767px)").matches) onPick();
-      }}
+      onClick={() => onPick()}
     >
       <span className="pigment-well block size-full rounded-full" />
     </button>
