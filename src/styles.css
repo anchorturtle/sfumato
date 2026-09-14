@@ -2034,10 +2034,18 @@ body.is-color-drag .canvas-col {
   display: none;
 }
 
-@media (min-width: 1024px), (min-width: 768px) and (orientation: landscape) {
+@media (min-width: 768px) {
+  .studio-dock {
+    overflow: visible;
+  }
+
   .dock-actions {
     display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 4px;
   }
+
   .dock-more {
     display: none;
   }
@@ -3286,4 +3294,32 @@ body.is-color-drag .canvas-col {
   aspect-ratio: 1;
   flex: none;
   grid-column: 1 / -1;
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .studio-dock {
+    gap: 6px;
+    padding: 5px 8px 5px 10px;
+  }
+
+  .dock-actions .analog-btn,
+  .dock-nav .analog-btn,
+  .dock-end .analog-btn.analog-round {
+    min-width: 34px;
+    min-height: 34px;
+    width: 34px;
+    height: 34px;
+  }
+
+  .enlarge-chip {
+    min-width: 34px;
+    height: 34px;
+    padding: 0 8px;
+  }
+
+  .orbit-deck {
+    max-width: 9.5rem;
+    flex: 1 1 6rem;
+    padding: 2px 6px 2px 2px;
+  }
 }

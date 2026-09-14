@@ -1220,6 +1220,11 @@ export function Studio() {
                 <Wand2 className="size-5" />
               </button>
             </IconTip>
+            <IconTip label="Blank canvas">
+              <button type="button" className="analog-btn analog-round" aria-label="Blank canvas" onClick={onClearCanvas}>
+                <Trash2 className="size-5" />
+              </button>
+            </IconTip>
             <IconTip label="Save canvas">
               <button type="button" className="analog-btn analog-round" aria-label="Save canvas" onClick={() => void saveNow()}>
                 <Save className="size-5" />
