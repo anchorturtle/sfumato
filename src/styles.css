@@ -401,6 +401,10 @@ textarea,
     min-height: 0;
   }
 
+  .studio-shell.is-focus .desk-hide {
+    display: none !important;
+  }
+
   .sheet-scrim,
   .sheet-close {
     display: none !important;
@@ -436,7 +440,7 @@ textarea,
   }
 
   .tools-rail {
-    max-height: 7.1rem;
+    max-height: 4.85rem;
   }
 
   .tools-rail .orbit-win {
@@ -449,40 +453,43 @@ textarea,
 
   .tools-rail .win-body {
     overflow: hidden;
-    padding: 6px 8px 5px;
+    padding: 6px 8px 4px;
   }
 
   .tools-strip {
     display: grid;
-    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-    gap: 4px 10px;
+    grid-template-columns: 6.6rem minmax(0, 1fr);
+    gap: 6px 10px;
+    align-items: end;
+  }
+
+  .tools-menus {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .tools-menu-btn {
+    width: 100%;
+    min-width: 0;
+    height: 28px;
+    min-height: 28px;
+    justify-content: flex-start;
+    padding: 0 8px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
 
   .tools-feel {
-    grid-column: 1 / -1;
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 2px 8px;
   }
 
-  .tools-rail .symbol-slider [data-slot="slider"] {
-    display: none;
-  }
-
-  .tools-rail .symbol-hit.analog-btn {
-    width: 28px;
-    min-width: 28px;
-    min-height: 28px;
-    height: 28px;
-    flex: 0 0 28px;
-  }
-
-  .tools-rail .symbol-slider-head {
-    margin-bottom: 2px;
-  }
-
-  .tools-rail .tape-counter {
-    font-size: 9px;
+  .tools-feel [data-slot="slider"] {
+    height: 22px;
   }
 }
 
@@ -1081,6 +1088,12 @@ textarea,
     transform 220ms var(--spring),
     box-shadow 160ms var(--ease-out);
   touch-action: manipulation;
+}
+
+.tools-menu-btn.analog-btn {
+  min-width: 0;
+  min-height: 36px;
+  height: 36px;
 }
 
 .analog-btn.analog-round {
@@ -1849,8 +1862,10 @@ body.is-color-drag .canvas-col {
 .studio-shell.is-focus .mobile-dock,
 .studio-shell.is-focus .studio-dock,
 .studio-shell.is-focus .mobile-tubes,
+.studio-shell.is-focus .dock-tabs,
+.studio-shell.is-focus .sheet-scrim,
 .studio-shell.is-focus .canvas-win .win-bar {
-  display: none;
+  display: none !important;
 }
 
 .studio-shell.is-focus .studio-body {
@@ -2316,6 +2331,12 @@ body.is-color-drag .canvas-col {
 
 .focus-size-row .focus-size-btn:last-of-type {
   grid-area: plus;
+}
+
+.focus-size-slider {
+  grid-column: 1 / -1;
+  min-width: 0;
+  padding: 0 2px 2px;
 }
 
 .focus-nav-label {
@@ -2984,6 +3005,25 @@ body.is-color-drag .canvas-col {
   gap: 6px;
 }
 
+.tools-menus {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.tools-menu-btn {
+  min-width: 0;
+  height: 36px;
+  min-height: 36px;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 0 10px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .tools-feel {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(5.2rem, 1fr));
@@ -2997,6 +3037,60 @@ body.is-color-drag .canvas-col {
 .tools-feel .tape-counter {
   font-size: 9px;
   letter-spacing: 0.08em;
+}
+
+.tube-slider {
+  min-width: 0;
+  padding: 2px 0 4px;
+}
+
+.tube-slider-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.tube-slider-row {
+  display: flex;
+  gap: 5px;
+  overflow-x: auto;
+  padding: 4px 2px 6px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  touch-action: pan-x;
+}
+
+.tube-slider-row .tube-dot {
+  width: 1.85rem;
+  height: 1.85rem;
+  min-width: 1.85rem;
+  flex: 0 0 1.85rem;
+}
+
+.tube-slider [data-slot="slider"] {
+  height: 22px;
+}
+
+.palette-list .color-wheel,
+.palette-list .tube-rack.color-wheel,
+.palette-strip-colors {
+  overflow: visible;
+  mask-image: none;
+  scroll-snap-type: none;
+  touch-action: pan-y;
+}
+
+.palette-list .color-wheel-track,
+.palette-strip-colors .color-wheel-track {
+  display: flex;
+  flex-wrap: wrap;
+  width: auto;
+  min-width: 0;
+  max-width: 100%;
+  padding: 2px 0 4px;
+  gap: 5px;
 }
 
 .symbol-slider {

@@ -1402,6 +1402,10 @@ export function Studio() {
                   <Plus className="size-6" />
                 </button>
               </div>
+              <label className="focus-size-slider">
+                <span className="sr-only">Brush size</span>
+                <Slider min={SIZE_MIN} max={SIZE_MAX} step={1} value={[size]} onValueChange={(v) => v[0] != null && setSize(v[0])} />
+              </label>
               <button type="button" className="focus-btn focus-nav-label" aria-label="Hide tools" onClick={() => setHudOn(false)}>
                 <span>Hide</span>
                 <ChevronsUp className="size-4" />
@@ -1533,18 +1537,10 @@ export function Studio() {
             <WinBar title="Tools" meta={colorHex} onClose={closeDeck} />
             <div className="win-body p-2">
             <div className="tools-strip">
-              <SymbolSlider
-                label="Tool"
-                value={tool}
-                options={TOOLS.map((t) => ({ id: t.id, label: t.label, icon: t.icon }))}
-                onChange={(id) => setTool(id as OilTool)}
-              />
-              <SymbolSlider
-                label="Hair"
-                value={brush}
-                options={BRUSHES.map((b) => ({ id: b.id, label: b.label, mark: b.id }))}
-                onChange={(id) => setBrush(id as BrushShape)}
-              />
+              <div className="tools-menus">
+                <ToolMenu tool={tool} onTool={setTool} />
+                <HairMenu brush={brush} onBrush={setBrush} />
+              </div>
               <div className="tools-feel">
               <SliderField label="Size" value={size} min={SIZE_MIN} max={SIZE_MAX} step={1} onChange={setSize} />
               <SliderField label="Body" value={body} min={0} max={1} step={0.01} onChange={setBody} />
@@ -1776,6 +1772,64 @@ function IconTip({ label, children }: { label: string; children: ReactNode }) {
 
 function HairMark({ shape }: { shape: BrushShape }) {
   return <span className={cn("hair-mark", `hair-${shape}`)} aria-hidden />;
+}
+
+function ToolMenu({ tool, onTool }: { tool: OilTool; onTool: (t: OilTool) => void }) {
+  const current = TOOLS.find((t) => t.id === tool) ?? TOOLS[0]!;
+  const Icon = current.icon;
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button type="button" className="analog-btn analog-chip tools-menu-btn" aria-label={`Tool ${current.label}`}>
+          <Icon className="size-4" />
+          <span>{current.label}</span>
+        </button>
+      </PopoverTrigger>
+      <PopoverContent align="start" side="top" className="w-48 p-1">
+        {TOOLS.map((t) => {
+          const Item = t.icon;
+          return (
+            <button
+              key={t.id}
+              type="button"
+              className={cn("analog-btn analog-chip mt-0.5 w-full justify-start", tool === t.id && "is-on")}
+              onClick={() => onTool(t.id)}
+            >
+              <Item className="size-4" />
+              {t.label}
+            </button>
+          );
+        })}
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function HairMenu({ brush, onBrush }: { brush: BrushShape; onBrush: (b: BrushShape) => void }) {
+  const current = BRUSHES.find((b) => b.id === brush) ?? BRUSHES[0]!;
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button type="button" className="analog-btn analog-chip tools-menu-btn" aria-label={`Hair ${current.label}`}>
+          <HairMark shape={current.id} />
+          <span>{current.label}</span>
+        </button>
+      </PopoverTrigger>
+      <PopoverContent align="start" side="top" className="w-44 p-1">
+        {BRUSHES.map((b) => (
+          <button
+            key={b.id}
+            type="button"
+            className={cn("analog-btn analog-chip mt-0.5 w-full justify-start", brush === b.id && "is-on")}
+            onClick={() => onBrush(b.id)}
+          >
+            <HairMark shape={b.id} />
+            {b.label}
+          </button>
+        ))}
+      </PopoverContent>
+    </Popover>
+  );
 }
 
 function SymbolSlider({
